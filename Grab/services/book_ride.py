@@ -7,7 +7,7 @@ from services.general import check_login_status, clear_unexpected_popups
 def book_ride(destination, pickup_time):
     d = u2.connect()
     sess = d.session("com.grabtaxi.passenger") 
-    if d(textContains="access").exists:
+    if d(textContains="access").wait(timeout=5.0):
         print("Found text with 'access'")
     sess(text="Transport").click()
 
