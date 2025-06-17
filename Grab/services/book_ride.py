@@ -4,7 +4,7 @@ import uiautomator2 as u2
 import time
 from services.general import check_login_status, clear_unexpected_popups
 
-def book_ride():
+def book_ride(destination, pickup_time):
     d = u2.connect()
     d.app_start("com.grab.taxibooking")
     time.sleep(5)
