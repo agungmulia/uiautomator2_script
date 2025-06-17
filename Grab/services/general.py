@@ -70,7 +70,7 @@ def accept_permissions(d):
                     print("Found text with 'access'")
                     for selector in yes_word:
                         try:
-                            el = d(text=selector)
+                            el = d(textMatches=f"(?i)^{selector}$")
                             if el.exists(timeout=2):
                                 el.click()
                                 print(f"[Popup] Closed: {selector}")
