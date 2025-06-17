@@ -1,7 +1,6 @@
 import time
 import requests
 
-
 def check_login_status(d):
     """
     Checks whether the user is logged in to the Grab app.
