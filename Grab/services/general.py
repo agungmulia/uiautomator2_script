@@ -62,7 +62,7 @@ def accept_permissions(d):
     Try to accept permissions.
     """
     yes_word = ["ok", "yes", "accept"]
-
+    time.sleep(1)
 
     try:
         for _ in range(5):  # Multiple attempts in case of multiple layers
@@ -71,7 +71,7 @@ def accept_permissions(d):
                     for selector in yes_word:
                         try:
                             el = d(textMatches=f"(?i)^{selector}$")
-                            if el.exists(timeout=1):
+                            if el.exists():
                                 el.click()
                                 print(f"[Popup] Closed: {selector}")
                                 time.sleep(1)
