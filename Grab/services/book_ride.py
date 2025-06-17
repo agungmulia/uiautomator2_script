@@ -15,14 +15,13 @@ def book_ride(destination, pickup_time):
         # Call login checker
         if not check_login_status(d):
             raise Exception("User is not logged in. Please log in to continue.")
-            print("🔐 Cannot continue without login.")
-            return
         
         clear_unexpected_popups(d)
 
         # Continue automation like booking ride
         print("📲 Proceeding to book ride...")
     except Exception as e:
+        d = u2.connect()
         sess = d.session("org.telegram.messenger") 
         return
 
