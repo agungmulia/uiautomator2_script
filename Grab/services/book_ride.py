@@ -6,7 +6,9 @@ from services.general import check_login_status, clear_unexpected_popups
 
 def book_ride(destination, pickup_time):
     d = u2.connect()
-    d.app_start("com.grab.taxibooking")
+    sess = d.session("com.grabtaxi.passenger") 
+    sess(text="Transport").click()
+    
     time.sleep(5)
 
     # Call login checker
