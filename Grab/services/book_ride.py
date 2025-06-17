@@ -2,14 +2,12 @@
 
 import uiautomator2 as u2
 import time
-from services.general import check_login_status, clear_unexpected_popups
+from services.general import check_login_status, clear_unexpected_popups, accept_permissions
 
 def book_ride(destination, pickup_time):
     d = u2.connect()
     sess = d.session("com.grabtaxi.passenger") 
-    if d(textContains="access").wait(timeout=5.0):
-        print("Found text with 'access'")
-    sess(text="Transport").click()
+    accept_permissions(d)
 
     time.sleep(5)
 

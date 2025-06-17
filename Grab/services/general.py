@@ -38,7 +38,7 @@ def clear_unexpected_popups(d):
     Try to close common popups (promos, permissions).
     """
     closers = [
-        {"textMatches": "(?i)skip|later|no thanks|×|x|dismiss"},
+        {"textMatches": "(?i)skip|later|no|no thanks|×|x|dismiss"},
         {"resourceId": "com.grab.taxibooking:id/btn_close"},
         {"description": "Close"},
     ]
@@ -54,5 +54,28 @@ def clear_unexpected_popups(d):
                         time.sleep(1)
                 except Exception as e:
                     print(f"[Warning] Error closing popup: {selector} → {e}")
+    except Exception as e:
+        print(f"[Error] Unexpected error in popup cleanup: {e}")
+
+def accept_permissions(d):
+    """
+    Try to accept permissions.
+    """
+    yes_word = ["ok", "yes", "accept"]
+
+
+    try:
+        for _ in range(5):  # Multiple attempts in case of multiple layers
+            if d(textContains="access").wait(timeout=5.0):
+                    print("Found text with 'access'")
+                    for selector in yes_word:
+                        try:
+                            el = d(text=selector)
+                            if el.exists(timeout=2):
+                                el.click()
+                                print(f"[Popup] Closed: {selector}")
+                                time.sleep(1)
+                        except Exception as e:
+                            print(f"[Warning] Error accepting permission: {selector} → {e}")
     except Exception as e:
         print(f"[Error] Unexpected error in popup cleanup: {e}")
