@@ -86,7 +86,7 @@ def notify_n8n(chat_id, message):
 
     payload = {
         "chat_id": chat_id,
-        "message": message
+        "message": str(message)
     }
 
     try:
