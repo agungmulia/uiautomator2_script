@@ -9,7 +9,7 @@ def check_login_status(d):
     """
     try:
         # First, wait briefly for the main screen or login prompt to load
-        time.sleep(1) 
+        time.sleep(0.5) 
 
         # Look for login screen indicators
         login_keywords = ["login", "sign in", "log in"]
@@ -21,7 +21,7 @@ def check_login_status(d):
         # Look for home screen keywords as positive signal
         home_keywords = ["Food", "Transport", "Mart", "Car", "Bike"]
         for keyword in home_keywords:
-            if d(textContains=keyword).exists(timeout=1):
+            if d(textContains=keyword).exists(timeout=0.5):
                 print("✅ User is logged in.")
                 return True
 
