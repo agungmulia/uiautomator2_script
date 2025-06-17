@@ -2,7 +2,7 @@
 
 import uiautomator2 as u2
 import time
-from general import check_login_status, clear_unexpected_popups
+from services.general import check_login_status, clear_unexpected_popups
 
 def main():
     d = u2.connect()
