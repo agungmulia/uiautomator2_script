@@ -14,7 +14,7 @@ def check_login_status(d):
         # Look for login screen indicators
         login_keywords = ["login", "sign in", "log in"]
         for keyword in login_keywords:
-            if d(textMatches=f"(?i)^{keyword}$").exists(timeout=1):
+            if d(textMatches=f"(?i)^{keyword}$").exists():
                 print("❌ Not logged in. Please log in first.")
                 return False
 
