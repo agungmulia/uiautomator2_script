@@ -1,7 +1,8 @@
 # cli_runner.py
 
 import sys
-from services import book_ride, order_food
+from services.book_ride import book_ride
+from services.order_food import order_food
 
 if __name__ == "__main__":
     try:
