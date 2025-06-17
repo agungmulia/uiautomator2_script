@@ -10,7 +10,7 @@ def book_ride(destination, pickup_time):
         sess = d.session("com.grabtaxi.passenger") 
         accept_permissions(d)
 
-        time.sleep(2)
+        time.sleep(1)
 
         # Call login checker
         if not check_login_status(d):

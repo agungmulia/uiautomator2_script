@@ -9,7 +9,7 @@ def check_login_status(d):
     """
     try:
         # First, wait briefly for the main screen or login prompt to load
-        time.sleep(2) 
+        time.sleep(1) 
 
         # Look for login screen indicators
         login_keywords = ["login", "sign in", "log in"]
