@@ -1,8 +1,7 @@
 # book_ride.py
 
 import uiautomator2 as u2
-import time
-from services.general import check_login_status, clear_unexpected_popups, accept_permissions
+from general import check_login_status, clear_unexpected_popups, accept_permissions, notify_n8n
 
 def book_ride(destination, pickup_time):
     try:
@@ -21,6 +20,7 @@ def book_ride(destination, pickup_time):
     except Exception as e:
         d = u2.connect()
         sess = d.session("org.telegram.messenger") 
+        notify_n8n("123", e)
         return
 
 if __name__ == "__main__":

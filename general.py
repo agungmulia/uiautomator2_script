@@ -1,4 +1,5 @@
 import time
+import requests
 
 
 def check_login_status(d):
@@ -9,7 +10,7 @@ def check_login_status(d):
     """
     try:
         # First, wait briefly for the main screen or login prompt to load
-        time.sleep(0.5) 
+        time.sleep(0.3) 
 
         # Look for login screen indicators
         login_keywords = ["login", "sign in", "log in"]
@@ -51,7 +52,7 @@ def clear_unexpected_popups(d):
                     if el.exists(timeout=1):
                         el.click()
                         print(f"[Popup] Closed: {selector}")
-                        time.sleep(1)
+                        time.sleep(0.3)
                 except Exception as e:
                     print(f"[Warning] Error closing popup: {selector} → {e}")
     except Exception as e:
@@ -74,8 +75,23 @@ def accept_permissions(d):
                             if el.exists():
                                 el.click()
                                 print(f"[Popup] Closed: {selector}")
-                                time.sleep(1)
+                                time.sleep(0.3)
                         except Exception as e:
                             print(f"[Warning] Error accepting permission: {selector} → {e}")
     except Exception as e:
         print(f"[Error] Unexpected error in popup cleanup: {e}")
+
+
+def notify_n8n(chat_id, message):
+    webhook_url = "https://n8n-dev2.heypico.ai/webhook-test/45bf8a05-f4f5-4daf-a864-c2feb5a3f095"  # Replace with your n8n Webhook URL
+
+    payload = {
+        "chat_id": chat_id,
+        "message": message
+    }
+
+    try:
+        response = requests.post(webhook_url, json=payload)
+        print(f"n8n Webhook response: {response.status_code} - {response.text}")
+    except Exception as e:
+        print(f"Failed to notify n8n: {e}")
