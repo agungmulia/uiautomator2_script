@@ -14,14 +14,14 @@ def check_login_status(d):
         # Look for login screen indicators
         login_keywords = ["login", "sign in", "log in"]
         for keyword in login_keywords:
-            if d(textMatches=f"(?i)^{keyword}$").exists(timeout=3):
+            if d(textMatches=f"(?i)^{keyword}$").exists(timeout=2):
                 print("❌ Not logged in. Please log in first.")
                 return False
 
         # Look for home screen keywords as positive signal
         home_keywords = ["Food", "Transport", "Mart", "Car", "Bike"]
         for keyword in home_keywords:
-            if d(textContains=keyword).exists(timeout=3):
+            if d(textContains=keyword).exists(timeout=2):
                 print("✅ User is logged in.")
                 return True
 
@@ -66,7 +66,7 @@ def accept_permissions(d):
 
     try:
         for _ in range(5):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=3.0):
+            if d(textContains="access").wait(timeout=2):
                     print("Found text with 'access'")
                     for selector in yes_word:
                         try:
