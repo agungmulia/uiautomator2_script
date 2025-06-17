@@ -8,6 +8,8 @@ def book_ride(destination, pickup_time):
     d = u2.connect()
     sess = d.session("com.grabtaxi.passenger") 
     print(d(textContains="access"))
+    print(d(textContains="access").exists)
+    print(sess(textContains="access").exists)
     if d(textContains="access").exists:
         print("Found text with 'access'")
     sess(text="Transport").click()
