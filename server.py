@@ -11,6 +11,7 @@ def ping():
 def grab():
     try:
         print("Received request:", request.json)
+        print("book_ride is:", book_ride)
         data = request.get_json()
         action = data.get("action")
         args = data.get("args", {})
