@@ -1,9 +1,9 @@
-# book_ride.py
+# check_price.py
 
 import uiautomator2 as u2
 from .general import check_login_status, clear_unexpected_popups, accept_permissions, notify_n8n
 
-def book_ride_handler(destination, pickup_time):
+def confirmation_check_handler(destination, pickup_time):
     print(f"🚖 Booking ride to {destination} at {pickup_time}...")
     try:
         d = u2.connect()
@@ -31,4 +31,4 @@ if __name__ == "__main__":
     else:
         dest = sys.argv[1]
         time_str = sys.argv[2]
-        book_ride_handler(dest, time_str)
+        confirmation_check_handler(dest, time_str)
