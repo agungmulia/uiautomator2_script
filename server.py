@@ -10,6 +10,7 @@ def ping():
 @app.route("/grab", methods=["POST"])
 def grab():
     try:
+        print("Received request:", request.json)
         data = request.get_json()
         action = data.get("action")
         args = data.get("args", {})
