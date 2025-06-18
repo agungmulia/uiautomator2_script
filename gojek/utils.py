@@ -52,12 +52,16 @@ def clear_unexpected_popups(d):
 
     try:
         print("=== DEBUG: All clickable elements ===")
+        texts = []
         for el in d.xpath("//*").all():
             text = el.attrib.get("text", "").strip()
+            texts.append(text.lower())
             if text:
                 print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
+        print("texts:", texts)
         for _ in range(3):  # Multiple attempts in case of multiple layers
-            if d(textContains="welcome").wait(timeout=0.5):
+            
+            if any("welcome" in t.lower() for t in texts):
                     print("Found text with 'welcome'")
                     for el in d.xpath("//*").all():
                         try:
@@ -118,3 +122,42 @@ def accept_permissions(d):
         print("=== DEBUG: Checking permissions finished ===")
     except Exception as e:
         print(f"[Error] Unexpected error in popup cleanup: {e}")
+
+def screen_components(d):
+    xml = d.dump_hierarchy()  # Get UI XML
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(xml)
+    elements = []
+    for node in root.iter():
+        if (not node.attrib.get("package", "").startswith("com.android")) and node.attrib.get("clickable") == "true":  # Only include Android widgets
+            print(node.attrib)
+        res_id = node.attrib.get("resource-id", "")
+        text = node.attrib.get("text", "")
+        if res_id or text:  # Only include elements with at least one property
+            elements.append({
+                "resource-id": res_id,
+                "text": text,
+                "class": node.attrib.get("class", ""),
+                "bounds": node.attrib.get("bounds", ""),
+                "clickable": node.attrib.get("clickable", "")
+            })
+    # Print all elements with both properties
+    for elem in elements:
+        if elem["resource-id"] and elem["text"]:
+            print(f"ID: {elem['resource-id']} | Text: '{elem['text']}' | Class: {elem['class']} | Bounds: {elem['bounds']} | Clickable: {elem['clickable']}")
+
+def find_components(d, text: str):
+    xml = d.dump_hierarchy()  # Get UI XML
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(xml)
+    for node in root.iter():
+        if node.attrib.get("text") == text:  # Only include Android widgets
+            res_id = node.attrib.get("resource-id", "")
+            text = node.attrib.get("text", "")
+            return {
+                "resource-id": res_id,
+                "text": text,
+                "class": node.attrib.get("class", ""),
+                "bounds": node.attrib.get("bounds", ""),
+                "clickable": node.attrib.get("clickable", "")
+            }
