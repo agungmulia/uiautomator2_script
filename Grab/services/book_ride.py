@@ -22,7 +22,7 @@ def book_ride_handler(destination, pickup_time):
         d = u2.connect()
         sess = d.session("org.telegram.messenger") 
         # notify_n8n("1333039921", e)
-        return e
+        return str(e)
 
 if __name__ == "__main__":
     import sys
