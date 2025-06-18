@@ -25,6 +25,8 @@ def grab():
         else:
             return jsonify({"error": "Unknown action"}), 400
 
+        print("Result:", result)
+
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
