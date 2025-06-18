@@ -16,6 +16,7 @@ def grab():
         args = data.get("args", {})
 
         if action == "book_ride":
+            print("Data:", data)
             print("Booking ride with args:", args)
             result = book_ride(args.get("destination"), args.get("time"))
 
