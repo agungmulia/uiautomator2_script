@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from Grab.services import book_ride_handler, order_food_handler
+from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler
 
 app = Flask(__name__)
 
@@ -21,6 +21,9 @@ def grab():
 
         elif action == "order_food":
             result = order_food_handler(args.get("item"), args.get("quantity"))
+
+        elif action == "confirmation_check":
+            result = confirmation_check_handler(data.get("destination"), data.get("time"))
 
         else:
             return jsonify({"error": "Unknown action"}), 400
