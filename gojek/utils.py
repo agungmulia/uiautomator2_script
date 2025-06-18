@@ -1,5 +1,4 @@
 import time
-import requests
 import re
 def check_login_status(d):
     """
@@ -21,7 +20,7 @@ def check_login_status(d):
         # Look for home screen keywords as positive signal
         home_keywords = ["Food", "Transport", "Mart", "Car", "Bike"]
         for keyword in home_keywords:
-            if d(textContains=keyword).exists(timeout=0.3):
+            if d(textContains=keyword).exists(timeout=0.5):
                 print("✅ User is logged in.")
                 return True
 
@@ -48,7 +47,7 @@ def clear_unexpected_popups(d):
             for selector in closers:
                 try:
                     el = d(**selector)
-                    if el.exists(timeout=0.3):
+                    if el.exists(timeout=1):
                         el.click()
                         print(f"[Popup] Closed: {selector}")
                         time.sleep(0.3)
@@ -61,7 +60,7 @@ def accept_permissions(d):
     """
     Try to accept permissions.
     """
-    yes_word = ["ok", "yes", "accept", "allow", "turn on"]
+    yes_word = ["ok", "yes", "accept"]
     time.sleep(1)
 
     try:
@@ -89,18 +88,3 @@ def accept_permissions(d):
                             print(f"[Warning] Error accepting permission: {selector} → {e}")
     except Exception as e:
         print(f"[Error] Unexpected error in popup cleanup: {e}")
-
-
-def notify_n8n(chat_id, message):
-    webhook_url = "https://n8n-dev2.heypico.ai/webhook-test/45bf8a05-f4f5-4daf-a864-c2feb5a3f095"  # Replace with your n8n Webhook URL
-
-    payload = {
-        "chat_id": chat_id,
-        "message": str(message)
-    }
-
-    try:
-        response = requests.post(webhook_url, json=payload)
-        print(f"n8n Webhook response: {response.status_code} - {response.text}")
-    except Exception as e:
-        print(f"Failed to notify n8n: {e}")
