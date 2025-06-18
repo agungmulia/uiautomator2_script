@@ -1,5 +1,5 @@
 import sys
-from .book_ride import book_ride
+from book_ride import book_ride
 if __name__ == "__main__":
     try:
         action = sys.argv[1]
