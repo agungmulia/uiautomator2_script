@@ -18,10 +18,9 @@ def book_ride(destination, pickup_time):
         # Continue automation like booking ride
         print("📲 Proceeding to book ride...")
     except Exception as e:
-        # d = u2.connect()
-        # sess = d.session("org.telegram.messenger") 
-        # notify_n8n("1333039921", e)
-        print(f"[Error] Failed to book ride: {e}")
+        d = u2.connect()
+        sess = d.session("org.telegram.messenger") 
+        notify_n8n("1333039921", e)
         return
 
 if __name__ == "__main__":
