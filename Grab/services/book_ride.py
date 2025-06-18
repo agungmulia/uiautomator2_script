@@ -1,7 +1,7 @@
 # book_ride.py
 
 import uiautomator2 as u2
-from app.general import check_login_status, clear_unexpected_popups, accept_permissions, notify_n8n
+from general import check_login_status, clear_unexpected_popups, accept_permissions, notify_n8n
 
 def book_ride_handler(destination, pickup_time):
     print(f"🚖 Booking ride to {destination} at {pickup_time}...")
