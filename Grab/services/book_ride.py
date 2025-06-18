@@ -21,8 +21,8 @@ def book_ride_handler(destination, pickup_time):
     except Exception as e:
         d = u2.connect()
         sess = d.session("org.telegram.messenger") 
-        notify_n8n("1333039921", e)
-        return
+        # notify_n8n("1333039921", e)
+        return e
 
 if __name__ == "__main__":
     import sys
