@@ -30,7 +30,7 @@ def grab():
 
         print("Result:", result)
 
-        return jsonify(result)
+        return jsonify({"message": result})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
