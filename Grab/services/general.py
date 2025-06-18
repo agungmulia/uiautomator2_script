@@ -21,7 +21,7 @@ def check_login_status(d):
         # Look for home screen keywords as positive signal
         home_keywords = ["Food", "Transport", "Mart", "Car", "Bike"]
         for keyword in home_keywords:
-            if d(textContains=keyword).exists(timeout=0.5):
+            if d(textContains=keyword).exists(timeout=0.3):
                 print("✅ User is logged in.")
                 return True
 
@@ -48,7 +48,7 @@ def clear_unexpected_popups(d):
             for selector in closers:
                 try:
                     el = d(**selector)
-                    if el.exists(timeout=1):
+                    if el.exists(timeout=0.3):
                         el.click()
                         print(f"[Popup] Closed: {selector}")
                         time.sleep(0.3)
