@@ -7,9 +7,14 @@ def check_login_status(d):
     Raises exception if something goes wrong.
     """
     try:
+        print("=== DEBUG: Checking login status ===")
         # First, wait briefly for the main screen or login prompt to load
-        time.sleep(0.3) 
-
+        time.sleep(2) 
+        print("=== DEBUG: All clickable elements ===")
+        for el in d.xpath("//*").all():
+            text = el.attrib.get("text", "").strip()
+            if text:
+                print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
         # Look for login screen indicators
         login_keywords = ["login", "sign in", "log in"]
         for keyword in login_keywords:
@@ -18,14 +23,19 @@ def check_login_status(d):
                 return False
 
         # Look for home screen keywords as positive signal
-        home_keywords = ["Food", "Transport", "Mart", "Car", "Bike"]
-        for keyword in home_keywords:
-            if d(textContains=keyword).exists(timeout=0.5):
-                print("✅ User is logged in.")
-                return True
+        home_keywords = ["search", "redeem", "adventure"]
+        for el in d.xpath("//*").all():
+                        try:
+                            text = el.attrib.get("text", "").strip().lower()
+                            if not text:
+                                continue
 
-        print("⚠️ Could not determine login status. Assuming not logged in.")
-        return False
+                            for keyword in home_keywords:
+                                if keyword in text:
+                                    return True
+                        except Exception as e:
+                            print("⚠️ Could not determine login status. Assuming not logged in.")
+                            return False
 
     except Exception as e:
         print(f"[Error] Failed to check login status: {e}")
@@ -34,25 +44,42 @@ def check_login_status(d):
 
 def clear_unexpected_popups(d):
     """
-    Try to close common popups (promos, permissions).
+    Try to close popus.
     """
-    closers = [
-        {"textMatches": "(?i)skip|later|no|no thanks|×|x|dismiss"},
-        {"resourceId": "com.grab.taxibooking:id/btn_close"},
-        {"description": "Close"},
-    ]
+    print("=== DEBUG: Checking popups ===")
+
+    yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome"]
 
     try:
+        print("=== DEBUG: All clickable elements ===")
+        for el in d.xpath("//*").all():
+            text = el.attrib.get("text", "").strip()
+            if text:
+                print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
         for _ in range(3):  # Multiple attempts in case of multiple layers
-            for selector in closers:
-                try:
-                    el = d(**selector)
-                    if el.exists(timeout=1):
-                        el.click()
-                        print(f"[Popup] Closed: {selector}")
-                        time.sleep(0.3)
-                except Exception as e:
-                    print(f"[Warning] Error closing popup: {selector} → {e}")
+            if d(textContains="welcome").wait(timeout=0.5):
+                    print("Found text with 'welcome'")
+                    for el in d.xpath("//*").all():
+                        try:
+                            text = el.attrib.get("text", "").strip().lower()
+                            if not text:
+                                continue
+
+                            for keyword in yes_word:
+                                if keyword in text:
+                                    print(f"[Match] Trying to click: '{text}'")
+                                    el.click()
+                                    print(f"[Clicked] Matched: {text}")
+                                    break  # stop after one match
+                        except Exception as e:
+                            print(f"[Error] While processing node: {e}")
+                    print("=== DEBUG: All clickable elements ===")
+                    for el in d.xpath("//*").all():
+                        text = el.attrib.get("text", "").strip()
+                        if text:
+                            print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
+        print("=== DEBUG: Checking popups finished ===")
+                    
     except Exception as e:
         print(f"[Error] Unexpected error in popup cleanup: {e}")
 
@@ -60,31 +87,34 @@ def accept_permissions(d):
     """
     Try to accept permissions.
     """
-    yes_word = ["ok", "yes", "accept"]
-    time.sleep(1)
+    print("=== DEBUG: Checking permissions ===")
+    yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome"]
+    time.sleep(2)
 
     try:
+        
         for _ in range(5):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=1):
+            if d(textContains="access").wait(timeout=0.5) or d(textContains="welcome").wait(timeout=0.5):
                     print("Found text with 'access'")
-                    for selector in yes_word:
+                    for el in d.xpath("//*").all():
                         try:
-                            el = d(textMatches=f"(?i)^{re.escape(selector)}$")
-                            if el.exists:
-                                print(f"Exact match found: {el.info.get('text')}")
-                                el.click()
-                                print(f"[Popup] Clicked (exact): {selector}")
-                                time.sleep(0.3)
+                            text = el.attrib.get("text", "").strip().lower()
+                            if not text:
                                 continue
 
-                            # Fallback: partial match without clickable filter
-                            el = d(textMatches=f"(?i).*{re.escape(selector)}.*", clickable=True)
-                            if el.exists:
-                                print(f"Partial match found: {el.info.get('text')}")
-                                el.click()
-                                print(f"[Popup] Clicked (partial): {selector}")
-                                time.sleep(0.3)
+                            for keyword in yes_word:
+                                if keyword in text:
+                                    print(f"[Match] Trying to click: '{text}'")
+                                    el.click()
+                                    print(f"[Clicked] Matched: {text}")
+                                    break  # stop after one match
                         except Exception as e:
-                            print(f"[Warning] Error accepting permission: {selector} → {e}")
+                            print(f"[Error] While processing node: {e}")
+                    print("=== DEBUG: All clickable elements ===")
+                    for el in d.xpath("//*").all():
+                        text = el.attrib.get("text", "").strip()
+                        if text:
+                            print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
+        print("=== DEBUG: Checking permissions finished ===")
     except Exception as e:
         print(f"[Error] Unexpected error in popup cleanup: {e}")
