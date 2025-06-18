@@ -62,7 +62,7 @@ def accept_permissions(d):
     Try to accept permissions.
     """
     yes_word = ["ok", "yes", "accept", "allow", "turn on"]
-    time.sleep(1)
+    time.sleep(0.5)
 
     try:
         for _ in range(5):  # Multiple attempts in case of multiple layers
