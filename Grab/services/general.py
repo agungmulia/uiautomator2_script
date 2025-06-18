@@ -1,6 +1,6 @@
 import time
 import requests
-
+import re
 def check_login_status(d):
     """
     Checks whether the user is logged in to the Grab app.
@@ -70,10 +70,20 @@ def accept_permissions(d):
                     print("Found text with 'access'")
                     for selector in yes_word:
                         try:
-                            el = d(textMatches=f"(?i)^{selector}$")
-                            if el.exists():
+                            el = d(textMatches=f"(?i)^{re.escape(selector)}$")
+                            if el.exists:
+                                print(f"Exact match found: {el.info.get('text')}")
                                 el.click()
-                                print(f"[Popup] Closed: {selector}")
+                                print(f"[Popup] Clicked (exact): {selector}")
+                                time.sleep(0.3)
+                                continue
+
+                            # Fallback: partial match without clickable filter
+                            el = d(textMatches=f"(?i).*{re.escape(selector)}.*", clickable=True)
+                            if el.exists:
+                                print(f"Partial match found: {el.info.get('text')}")
+                                el.click()
+                                print(f"[Popup] Clicked (partial): {selector}")
                                 time.sleep(0.3)
                         except Exception as e:
                             print(f"[Warning] Error accepting permission: {selector} → {e}")
