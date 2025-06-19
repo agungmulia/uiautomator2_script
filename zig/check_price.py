@@ -7,56 +7,54 @@ def check_price(destination, pickup_time):
         print("init check price")
         d = u2.connect()
         d.app_start("com.codigo.comfort", stop=False)
-        # time.sleep(2)
-        # clear_unexpected_popups(d)
-        # # select language
-        # accept_permissions(d)
-        # print("debug screen components")
+        time.sleep(2)
+        clear_unexpected_popups(d)
+        # select language
+        accept_permissions(d)
+        print("debug screen components")
 
-        # # screen_components(d)
+        # screen_components(d)
         
-        # select_language(d)
+        select_language(d)
 
-        # if not check_login_status(d):
-        #     print("User is not logged in. Please log in to continue.")
-        #     return 
-        # clear_unexpected_popups(d)
+        if not check_login_status(d):
+            print("User is not logged in. Please log in to continue.")
+            return 
+        clear_unexpected_popups(d)
 
         # proceed book
         print("proceed booking")
-        # screen_components(d)
-        # ride_comp = find_components(d, "car rides")
-        # if ride_comp is not None:
-        #     ride_coord = coordinate_bounds(ride_comp["bounds"])
-        #     d.click(*ride_coord)
-        # if not d(resourceId="txtInputDestination").exists():
-        #     time.sleep(0.1)
-        # time.sleep(0.5)
-        # d(resourceId="txtInputDestination").click()
+        ride_comp = find_components(d, "car rides")
+        if ride_comp is not None:
+            ride_coord = coordinate_bounds(ride_comp["bounds"])
+            d.click(*ride_coord)
+        if not d(resourceId="txtInputDestination").exists():
+            time.sleep(0.1)
+        time.sleep(0.5)
+        d(resourceId="txtInputDestination").click()
         
-        # if not d(text="Where to?").exists():
-        #     time.sleep(0.1)
-        # time.sleep(0.3)
-        # d(text="Where to?").send_keys(destination)
-        # screen_components(d)
+        if not d(text="Where to?").exists():
+            time.sleep(0.1)
+        time.sleep(0.3)
+        d(text="Where to?").send_keys(destination)
+        screen_components(d)
 
-        # # choose first element in the search list
-        # if not d(resourceId="com.codigo.comfort:id/lblRecentLocationAddress").exists():
-        #     time.sleep(0.1)
-        # time.sleep(0.5)
-        # search_res_comps = find_components_by_id(d, "com.codigo.comfort:id/lblRecentLocationAddress")
-        # if search_res_comps is not None:
-        #     search_res_comp = search_res_comps[0]
-        #     search_res_coord = coordinate_bounds(search_res_comp["bounds"])
-        #     d.click(*search_res_coord)
+        # choose first element in the search list
+        if not d(resourceId="com.codigo.comfort:id/lblRecentLocationAddress").exists():
+            time.sleep(0.1)
+        time.sleep(0.5)
+        search_res_comps = find_components_by_id(d, "com.codigo.comfort:id/lblRecentLocationAddress")
+        if search_res_comps is not None:
+            search_res_comp = search_res_comps[0]
+            search_res_coord = coordinate_bounds(search_res_comp["bounds"])
+            d.click(*search_res_coord)
 
         # # confirm pick up
-        # if not d(resourceId="btnConfirmPickUp").exists():
-        #     time.sleep(0.1)
-        # time.sleep(0.5)
-        # d(resourceId="btnConfirmPickUp").click()
+        if not d(resourceId="btnConfirmPickUp").exists():
+            time.sleep(0.1)
+        time.sleep(0.5)
+        d(resourceId="btnConfirmPickUp").click()
 
-        screen_components(d)
 
         # choose cheapest fare
         fare_comps = find_components_by_id(d, "com.codigo.comfort:id/tvApplicableFare")
