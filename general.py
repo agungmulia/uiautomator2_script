@@ -46,6 +46,7 @@ def clear_unexpected_popups(d, resource_id = "com.grab.taxibooking:id/btn_close"
     while True:
         try:
             for selector in closers:
+                print(selector)
                 try:
                     el = d(**selector)
                     if el.exists(timeout=0.3):

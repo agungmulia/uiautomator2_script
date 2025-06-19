@@ -10,7 +10,7 @@ def confirmation_check_handler(destination, pickup_time):
         d = u2.connect()
         sess = d.session("com.grabtaxi.passenger") 
         threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
-        # threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
+        threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
 
         print("testing 1")
 
