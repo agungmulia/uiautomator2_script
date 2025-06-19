@@ -19,6 +19,7 @@ def confirmation_check_handler(destination, pickup_time):
             raise Exception("User is not logged in. Please log in to continue.")
         
         print("testing 2")
+        time.sleep(2) 
 
         sess(text="Transport").click()
 
