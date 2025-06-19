@@ -56,6 +56,7 @@ def clear_unexpected_popups(d, resource_id = "com.grab.taxibooking:id/btn_close"
                     print(f"[Warning] Error closing popup: {selector} → {e}")
         except Exception as e:
             print(f"[Error] Unexpected error in popup cleanup: {e}")
+        time.sleep(0.3)
 
 def accept_permissions(d):
     """
@@ -87,6 +88,7 @@ def accept_permissions(d):
                                 time.sleep(0.3)
                         except Exception as e:
                             print(f"[Warning] Error accepting permission: {selector} → {e}")
+                        time.sleep(0.3)
         except Exception as e:
             print(f"[Error] Unexpected error in popup cleanup: {e}")
 
