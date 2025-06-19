@@ -37,17 +37,14 @@ def clear_unexpected_popups(d, resource_id = "com.grab.taxibooking:id/btn_close"
     """
     Try to close common popups (promos, permissions).
     """
-    closers = [
-        {"className": "android.widget.TextView", "textMatches": "(?i)\\b(skip|later|no thanks|dismiss)\\b"},
-        {"resourceId": resource_id},
-        {"description": "Close"},
-    ]
+    closeKeyWord = ["skip", "later", "no thanks", "dismiss"]
+
 
     while True:
         try:
-            for selector in closers:
+            for selector in closeKeyWord:
                 try:
-                    el = d(**selector)
+                    el = d(textMatches=f"(?i)^{selector}$")
                     if el.exists(timeout=0.3):
                         print(selector)
                         print(el)
