@@ -38,7 +38,7 @@ def clear_unexpected_popups(d, resource_id = "com.grab.taxibooking:id/btn_close"
     Try to close common popups (promos, permissions).
     """
     closers = [
-        {"textMatches": "(?i)skip|later|no|no thanks|×|x|dismiss"},
+        {"textMatches": "(?i)skip|later|no|no thanks|dismiss"},
         {"resourceId": resource_id},
         {"description": "Close"},
     ]
