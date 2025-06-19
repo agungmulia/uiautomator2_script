@@ -50,6 +50,7 @@ def clear_unexpected_popups(d, resource_id = "com.grab.taxibooking:id/btn_close"
                     el = d(**selector)
                     if el.exists(timeout=0.3):
                         print(selector)
+                        print(d.dump_hierarchy())
                         print(el)
                         el.click()
                         print(f"[Popup] Closed: {selector}")
