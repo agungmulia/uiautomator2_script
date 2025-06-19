@@ -40,15 +40,16 @@ def clear_unexpected_popups(d, resource_id = "com.grab.taxibooking:id/btn_close"
     closers = [
         {"textMatches": "(?i)skip|later|no|no thanks|dismiss"},
         {"resourceId": resource_id},
+        {"description": "Close"},
     ]
 
     while True:
         try:
             for selector in closers:
-                print(selector)
                 try:
                     el = d(**selector)
                     if el.exists(timeout=0.3):
+                        print(el)
                         el.click()
                         print(f"[Popup] Closed: {selector}")
                         time.sleep(0.3)
