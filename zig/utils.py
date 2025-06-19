@@ -25,7 +25,7 @@ def check_login_status(d):
             if d(textMatches=fr"(?i).*{keyword}.*").exists:
                 print("❌ Not logged in. Please log in first.")
                 return False
-
+        return True
     except Exception as e:
         print(f"[Error] Failed to check login status: {e}")
         return False
@@ -37,7 +37,7 @@ def clear_unexpected_popups(d):
     """
     print("=== DEBUG: Checking popups ===")
 
-    yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome"]
+    yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome", "later"]
 
     try:
         print("=== DEBUG: All clickable elements ===")
@@ -71,6 +71,11 @@ def clear_unexpected_popups(d):
                         text = el.attrib.get("text", "").strip()
                         if text:
                             print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
+        comps = find_components_by_drawing_order(d, "2")
+        if comps is None:
+            return
+        comp_coord = coordinate_bounds(comps["bounds"])
+        d.click(*comp_coord)
         print("=== DEBUG: Checking popups finished ===")
                     
     except Exception as e:
@@ -81,12 +86,12 @@ def accept_permissions(d):
     Try to accept permissions.
     """
     print("=== DEBUG: Checking permissions ===")
-    yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome"]
+    yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome", "continue", "later"]
 
     try:
         
         for _ in range(4):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=0.3) or d(textContains="welcome").wait(timeout=0.3):
+            if d(textContains="access").wait(timeout=0.3) or d(textContains="welcome").wait(timeout=0.3) or d(textContains="Go Cashless"):
                     print("Found text with 'access'")
                     for el in d.xpath("//*").all():
                         try:
@@ -139,7 +144,23 @@ def find_components(d, text: str):
     import xml.etree.ElementTree as ET
     root = ET.fromstring(xml)
     for node in root.iter():
-        if node.attrib.get("text").lower() == text:  # Only include Android widgets
+        if node.attrib.get("text") is not None and node.attrib.get("text").lower() == text:  # Only include Android widgets
+            res_id = node.attrib.get("resource-id", "")
+            text = node.attrib.get("text", "")
+            return {
+                "resource-id": res_id,
+                "text": text,
+                "class": node.attrib.get("class", ""),
+                "bounds": node.attrib.get("bounds", ""),
+                "clickable": node.attrib.get("clickable", "")
+            }
+def find_components_by_drawing_order(d, drawing_order: str):
+    xml = d.dump_hierarchy()  # Get UI XML
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(xml)
+    for node in root.iter():
+        if (not node.attrib.get("package", "").startswith("com.android")) and node.attrib.get("clickable") == "true" and node.attrib.get("drawing-order") == drawing_order:  # Only include Android widgets
+            print(node.attrib)
             res_id = node.attrib.get("resource-id", "")
             text = node.attrib.get("text", "")
             return {
