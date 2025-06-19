@@ -67,7 +67,7 @@ def accept_permissions(d):
 
     while True:
         try:
-            if d(textContains="access").wait(timeout=0.4):
+            if d(textMatches="(?i).*access|push notification.*").wait(timeout=0.4):
                     print("Found text with 'access'")
                     for selector in yes_word:
                         try:
