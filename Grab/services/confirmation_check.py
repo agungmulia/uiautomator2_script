@@ -10,7 +10,7 @@ def confirmation_check_handler(destination, pickup_time):
         d = u2.connect()
         sess = d.session("com.grabtaxi.passenger") 
         threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
-        threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
+        # threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
 
         print("testing 1")
 
@@ -25,7 +25,7 @@ def confirmation_check_handler(destination, pickup_time):
 
         time.sleep(2)  # Wait for the UI to update
         sess(text="Where to?").click()
-        sess(resourceId="com.grabtaxi.passenger:id/second_input_field_content_container").send_keys(destination)
+        sess(resourceId="com.grabtaxi.passenger:id/poi_second_search").send_keys(destination)
 
         time.sleep(2) # Wait for the UI to update
         sess(resourceId="com.grabtaxi.passenger:id/list_item_with_additional_info_container_parent", instance=0).click()
