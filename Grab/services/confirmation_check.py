@@ -24,7 +24,14 @@ def confirmation_check_handler(destination, pickup_time):
 
         time.sleep(2)  # Wait for the UI to update
         sess(text="Where to?").click()
+        sess(resourceId="com.grabtaxi.passenger:id/second_input_field_content_container").send_keys(destination)
 
+        time.sleep(2) # Wait for the UI to update
+        sess(resourceId="com.grabtaxi.passenger:id/list_item_with_additional_info_container_parent", instance=0).click()
+
+        time.sleep(2) # Wait for the UI to update
+        sess(text="Choose This Pickup").click()
+        
 
         # Continue automation like booking ride
         print("📲 Proceeding to book ride...")
