@@ -37,7 +37,7 @@ def clear_unexpected_popups(d, resource_id = "com.grab.taxibooking:id/btn_close"
     """
     Try to close common popups (promos, permissions).
     """
-    closeKeyWord = ["skip", "later", "no thanks", "dismiss"]
+    closeKeyWord = ["skip", "no thanks", "dismiss"]
 
 
     while True:
