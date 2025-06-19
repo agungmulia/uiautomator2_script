@@ -12,27 +12,26 @@ def confirmation_check_handler(destination, pickup_time):
         threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
         threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
 
-        print("testing 1")
 
         # Call login checker
         if not check_login_status(d):
             raise Exception("User is not logged in. Please log in to continue.")
         
-        print("testing 2")
-        time.sleep(2) 
+        time.sleep(1) 
 
         sess(text="Transport").click()
 
-        time.sleep(2)  # Wait for the UI to update
+        time.sleep(1)  # Wait for the UI to update
         sess(text="Where to?").click()
         sess(resourceId="com.grabtaxi.passenger:id/poi_second_search").send_keys(destination)
 
-        time.sleep(2) # Wait for the UI to update
+        time.sleep(1) # Wait for the UI to update
         sess(resourceId="com.grabtaxi.passenger:id/list_item_with_additional_info_container_parent", instance=0).click()
 
-        time.sleep(2) # Wait for the UI to update
+        time.sleep(1) # Wait for the UI to update
         sess(text="Choose This Pickup").click()
-        
+
+        print(sess(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view", instance=0)) 
 
         # Continue automation like booking ride
         print("📲 Proceeding to book ride...")
