@@ -35,7 +35,18 @@ def confirmation_check_handler(destination, pickup_time):
 
         time.sleep(1) # Wait for the UI to update
 
-        print(sess(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view", instance=0).child()) 
+        ride_cards = sess(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view").all()
+
+        if not ride_cards:
+            print("❌ No ride options found")
+        else:
+            for idx, card in enumerate(ride_cards):
+                print(f"\n🚘 Ride #{idx + 1}")
+                children = card.child(className="android.widget.TextView").all()
+                for el in children:
+                    text = el.info.get("text", "").strip()
+                    if text:
+                        print("  -", text)
 
         # Continue automation like booking ride
         print("📲 Proceeding to book ride...")
