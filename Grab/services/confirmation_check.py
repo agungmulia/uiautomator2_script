@@ -35,7 +35,7 @@ def confirmation_check_handler(destination, pickup_time):
 
         time.sleep(1) # Wait for the UI to update
 
-        ride_cards = sess(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view").all()
+        ride_cards = d(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view").all()
 
         if not ride_cards:
             print("❌ No ride options found")
