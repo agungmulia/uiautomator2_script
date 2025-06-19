@@ -40,7 +40,7 @@ def confirmation_check_handler(destination, pickup_time):
         ride_infos = []
         # Find the container node for all ride options
         for item in tree.iter():
-            if item.attrib.get("resource-id") == "com.grabtaxi.passenger:id/xsell_confirmation_item_container":
+            if item.attrib.get("resource-id") == "com.grabtaxi.passenger:id/xsell_confirmation_taxi_type_name":
                 ride_info = {}
 
                 for sub in item.iter():
@@ -54,7 +54,7 @@ def confirmation_check_handler(destination, pickup_time):
                     elif rid == "com.grabtaxi.passenger:id/fareTextView":
                         ride_info["price"] = text
 
-                    ride_infos.append(ride_info)
+                ride_infos.append(ride_info)
 
 
         print(ride_infos)
