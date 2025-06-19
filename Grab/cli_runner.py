@@ -11,7 +11,10 @@ if __name__ == "__main__":
         if action == "check_price":
             destination = sys.argv[2]
             time = sys.argv[3]
+            print("confirmation_check_handler 1")
             result = confirmation_check_handler(destination, time)
+            print("confirmation_check_handler 2")
+
         if action == "book_ride":
             destination = sys.argv[2]
             time = sys.argv[3]
