@@ -22,16 +22,15 @@ def confirmation_check_handler(destination, pickup_time):
 
         sess(text="Transport").click()
 
-        time.sleep(1)  # Wait for the UI to update
+        time.sleep(2)  # Wait for the UI to update
 
         sess(text="Where to?").click()
         sess(resourceId="com.grabtaxi.passenger:id/poi_second_search").send_keys(destination)
 
-        time.sleep(1) # Wait for the UI to update
-
+        time.sleep(2) # Wait for the UI to update
         sess(resourceId="com.grabtaxi.passenger:id/list_item_with_additional_info_container_parent", instance=0).click()
 
-        time.sleep(1) # Wait for the UI to update
+        time.sleep(2) # Wait for the UI to update
         sess(text="Choose This Pickup").click()
         
 
