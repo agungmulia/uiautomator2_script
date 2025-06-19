@@ -24,6 +24,8 @@ def confirmation_check_handler(destination, pickup_time):
 
         time.sleep(2)  # Wait for the UI to update
         sess(text="Where to?").click()
+        time.sleep(10)  # Wait for the UI to update
+
         sess(resourceId="com.grabtaxi.passenger:id/poi_second_search").send_keys(destination)
 
 
