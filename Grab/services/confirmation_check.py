@@ -29,7 +29,7 @@ def confirmation_check_handler(destination, pickup_time):
 
         time.sleep(1) # Wait for the UI to update
 
-        sess(resourceId="com.grabtaxi.passenger:id/list_item_container").instance(0).click()
+        sess(resourceId="com.grabtaxi.passenger:id/list_item_container", instance=0).click()
         sess(text="Choose This Pickup").click()
         
 
