@@ -33,8 +33,6 @@ def confirmation_check_handler(destination, pickup_time):
         sess(text="Choose This Pickup").click()
 
         time.sleep(1) # Wait for the UI to update
-
-        time.sleep(1) # Wait for the UI to update
         xml_dump = d.dump_hierarchy()
         tree = ET.fromstring(xml_dump)
         ride_infos = []
@@ -55,18 +53,17 @@ def confirmation_check_handler(destination, pickup_time):
                         ride_info["price"] = text
 
                 ride_infos.append(ride_info)
+        print("📲 Ride confirmation success...")
+        print(ride_info)
 
-
-        print(ride_infos)
-
-        # Continue automation like booking ride
-        print("📲 Proceeding to book ride...")
+        d.app_start("org.telegram.messenger")
+        return (ride_infos)
     except Exception as e:
         d = u2.connect()
-        sess = d.session("org.telegram.messenger") 
+        d.app_start("org.telegram.messenger") 
         print(f"Error occurred: {e}")
         # notify_n8n("1333039921", e)
-        return str(e)
+        return {"message": str(e)}
 
 if __name__ == "__main__":
     import sys
