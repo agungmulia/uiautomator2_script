@@ -31,7 +31,8 @@ def confirmation_check_handler(destination, pickup_time):
         time.sleep(1) # Wait for the UI to update
         sess(text="Choose This Pickup").click()
 
-        print(sess(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view", instance=0)) 
+        print(sess(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view", instance=0).info()) 
+        print(sess(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view", instance=0).get_text) 
 
         # Continue automation like booking ride
         print("📲 Proceeding to book ride...")
