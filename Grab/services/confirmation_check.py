@@ -2,6 +2,7 @@
 import threading
 import time
 import uiautomator2 as u2
+import xml.etree.ElementTree as ET
 from general import check_login_status, clear_unexpected_popups, accept_permissions, notify_n8n
 
 def confirmation_check_handler(destination, pickup_time):
