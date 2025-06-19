@@ -48,13 +48,7 @@ def confirmation_check_handler(destination, pickup_time):
                     rid = sub.attrib.get("resource-id", "")
                     text = sub.attrib.get("text", "").strip()
 
-                    # Extract data based on known IDs
-                    if rid.endswith("xsell_confirmation_service_view"):
-                        ride_info["title"] = text
-                    elif rid.endswith("xsell_confirmation_taxi_type_subtitle"):
-                        ride_info["subtitle"] = text
-                    elif text.startswith("S$"):  # A possible price pattern
-                        ride_info["price"] = text
+                    print(rid)
 
                 print(ride_info)
 
