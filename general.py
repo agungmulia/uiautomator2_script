@@ -33,18 +33,18 @@ def check_login_status(d):
         return False
     
 
-def clear_unexpected_popups(d):
+def clear_unexpected_popups(d, resource_id = "com.grab.taxibooking:id/btn_close"):
     """
     Try to close common popups (promos, permissions).
     """
     closers = [
         {"textMatches": "(?i)skip|later|no|no thanks|×|x|dismiss"},
-        {"resourceId": "com.grab.taxibooking:id/btn_close"},
+        {"resourceId": resource_id},
         {"description": "Close"},
     ]
 
-    try:
-        for _ in range(3):  # Multiple attempts in case of multiple layers
+    while True:
+        try:
             for selector in closers:
                 try:
                     el = d(**selector)
@@ -54,19 +54,19 @@ def clear_unexpected_popups(d):
                         time.sleep(0.3)
                 except Exception as e:
                     print(f"[Warning] Error closing popup: {selector} → {e}")
-    except Exception as e:
-        print(f"[Error] Unexpected error in popup cleanup: {e}")
+        except Exception as e:
+            print(f"[Error] Unexpected error in popup cleanup: {e}")
 
 def accept_permissions(d):
     """
     Try to accept permissions.
     """
     yes_word = ["ok", "yes", "accept", "allow", "turn on"]
-    time.sleep(1)
+    time.sleep(0.5)
 
-    try:
-        for _ in range(5):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=1):
+    while True:
+        try:
+            if d(textContains="access").wait(timeout=0.4):
                     print("Found text with 'access'")
                     for selector in yes_word:
                         try:
@@ -87,8 +87,8 @@ def accept_permissions(d):
                                 time.sleep(0.3)
                         except Exception as e:
                             print(f"[Warning] Error accepting permission: {selector} → {e}")
-    except Exception as e:
-        print(f"[Error] Unexpected error in popup cleanup: {e}")
+        except Exception as e:
+            print(f"[Error] Unexpected error in popup cleanup: {e}")
 
 
 def notify_n8n(chat_id, message):

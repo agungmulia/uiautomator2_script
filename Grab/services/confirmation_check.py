@@ -1,20 +1,34 @@
 # check_price.py
-
+import threading
+import time
 import uiautomator2 as u2
-from .general import check_login_status, clear_unexpected_popups, accept_permissions, notify_n8n
+from general import check_login_status, clear_unexpected_popups, accept_permissions, notify_n8n
 
 def confirmation_check_handler(destination, pickup_time):
     print(f"🚖 Booking ride to {destination} at {pickup_time}...")
     try:
         d = u2.connect()
         sess = d.session("com.grabtaxi.passenger") 
-        accept_permissions(d)
+        threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
+        threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
 
         # Call login checker
         if not check_login_status(d):
             raise Exception("User is not logged in. Please log in to continue.")
         
-        clear_unexpected_popups(d)
+        sess(text="Transport").click()
+
+        time.sleep(1)  # Wait for the UI to update
+
+
+        sess(text="Where to?").click()
+        sess(resourceId="com.grabtaxi.passenger:id/poi_second_search").send_keys(address)
+
+        time.sleep(1) # Wait for the UI to update
+
+        sess.xpath('(//android.widget.RelativeLayout[@resource-id="com.grabtaxi.passenger:id/list_item_container"])[1]').click()
+        sess(text="Choose This Pickup").click()
+        
 
         # Continue automation like booking ride
         print("📲 Proceeding to book ride...")
