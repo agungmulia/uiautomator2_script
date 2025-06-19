@@ -54,7 +54,7 @@ def confirmation_check_handler(destination, pickup_time):
                     elif rid == "com.grabtaxi.passenger:id/fareTextView":
                         ride_info["price"] = text
 
-                    ride_infos.append(ride)
+                    ride_infos.append(ride_info)
 
 
         print(ride_infos)
