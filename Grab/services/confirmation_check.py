@@ -12,10 +12,14 @@ def confirmation_check_handler(destination, pickup_time):
         threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
         threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
 
+        print("testing 1")
+
         # Call login checker
         if not check_login_status(d):
             raise Exception("User is not logged in. Please log in to continue.")
         
+        print("testing 2")
+
         sess(text="Transport").click()
 
         time.sleep(1)  # Wait for the UI to update
