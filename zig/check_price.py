@@ -6,7 +6,7 @@ def check_price(destination, pickup_time):
     try:
         print("init check price")
         d = u2.connect()
-        d.app_start("com.codigo.comfort", stop=False)
+        d.app_start("com.codigo.comfort", stop=True)
         time.sleep(2)
         clear_unexpected_popups(d)
         # select language
