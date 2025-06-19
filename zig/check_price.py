@@ -56,6 +56,9 @@ def check_price(destination, pickup_time):
         d(resourceId="btnConfirmPickUp").click()
 
 
+        if not d(resourceId="com.codigo.comfort:id/tvApplicableFare").exists():
+            time.sleep(0.1)
+        time.sleep(0.5)
         # choose cheapest fare
         fare_comps = find_components_by_id(d, "com.codigo.comfort:id/tvApplicableFare")
         # Filter to only those with single-price format
