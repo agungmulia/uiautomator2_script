@@ -151,7 +151,7 @@ def find_components(d, text: str):
     import xml.etree.ElementTree as ET
     root = ET.fromstring(xml)
     for node in root.iter():
-        if node.attrib.get("text") == text:  # Only include Android widgets
+        if node.attrib.get("text").lower() == text:  # Only include Android widgets
             res_id = node.attrib.get("resource-id", "")
             text = node.attrib.get("text", "")
             return {
@@ -161,3 +161,26 @@ def find_components(d, text: str):
                 "bounds": node.attrib.get("bounds", ""),
                 "clickable": node.attrib.get("clickable", "")
             }
+def find_components_by_id(d, id: str):
+    xml = d.dump_hierarchy()  # Get UI XML
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(xml)
+    comps = []
+    for node in root.iter():
+        if node.attrib.get("resource-id") == id:  # Only include Android widgets
+            res_id = node.attrib.get("resource-id", "")
+            text = node.attrib.get("text", "")
+            comps.append({
+                "resource-id": res_id,
+                "text": text,
+                "class": node.attrib.get("class", ""),
+                "bounds": node.attrib.get("bounds", ""),
+                "clickable": node.attrib.get("clickable", "")
+            })
+    return comps
+def coordinate_bounds(bounds: str):
+    x1, y1, x2, y2 = map(int, bounds.strip("[]").replace("][", ",").split(","))
+    # Calculate center (x, y)
+    center_x = (x1 + x2) // 2 
+    center_y = (y1 + y2) // 2 
+    return center_x, center_y
