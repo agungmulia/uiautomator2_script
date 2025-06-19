@@ -38,6 +38,7 @@ def confirmation_check_handler(destination, pickup_time):
     except Exception as e:
         d = u2.connect()
         sess = d.session("org.telegram.messenger") 
+        print(f"Error occurred: {e}")
         # notify_n8n("1333039921", e)
         return str(e)
 
