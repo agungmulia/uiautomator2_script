@@ -35,7 +35,8 @@ def confirmation_check_handler(destination, pickup_time):
         time.sleep(1) # Wait for the UI to update
 
         time.sleep(1) # Wait for the UI to update
-
+        ride_items = d(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_item_container")
+        print(ride_items)
         xml_dump = d.dump_hierarchy()
         tree = ET.fromstring(xml_dump)
         ride_infos = []
@@ -45,7 +46,6 @@ def confirmation_check_handler(destination, pickup_time):
                 ride_info = {}
 
                 for sub in item.iter():
-                    print(sub)
                     rid = sub.attrib.get("resource-id", "")
                     text = sub.attrib.get("text", "").strip()
 
