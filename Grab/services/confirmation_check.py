@@ -54,8 +54,6 @@ def confirmation_check_handler(destination, pickup_time):
 
                 ride_infos.append(ride_info)
         print("📲 Ride confirmation success...")
-        print(ride_info)
-
         d.app_start("org.telegram.messenger")
         return (ride_infos)
     except Exception as e:

@@ -7,7 +7,7 @@ def book_ride_handler(destination, pickup_time):
     print(f"🚖 Booking ride to {destination} at {pickup_time}...")
     try:
         d = u2.connect()
-        sess = d.session("com.grabtaxi.passenger") 
+        d.app_start("com.grabtaxi.passenger") 
         accept_permissions(d)
 
         # Call login checker
