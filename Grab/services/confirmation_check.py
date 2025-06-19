@@ -38,13 +38,14 @@ def confirmation_check_handler(destination, pickup_time):
 
         xml_dump = d.dump_hierarchy()
         tree = ET.fromstring(xml_dump)
-
+        ride_infos = []
         # Find the container node for all ride options
         for item in tree.iter():
             if item.attrib.get("resource-id") == "com.grabtaxi.passenger:id/xsell_confirmation_item_container":
                 ride_info = {}
 
                 for sub in item.iter():
+                    print(sub)
                     rid = sub.attrib.get("resource-id", "")
                     text = sub.attrib.get("text", "").strip()
 
