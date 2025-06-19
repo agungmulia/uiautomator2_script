@@ -35,24 +35,27 @@ def confirmation_check_handler(destination, pickup_time):
 
         time.sleep(1) # Wait for the UI to update
 
-        d(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view").wait(timeout=5)
+        xml_dump = d.dump_hierarchy()
+        tree = ET.fromstring(xml_dump)
 
-        rides = d(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view").all()
+        # Find the container node for all ride options
+        for item in tree.iter():
+            if item.attrib.get("resource-id") == "com.grabtaxi.passenger:id/xsell_confirmation_item_container":
+                ride_info = {}
 
-        if not rides:
-            print("❌ No ride options found.")
-        else:
-            for i, ride in enumerate(rides):
-                print(f"\n🚘 Ride Option #{i + 1}")
-                child_count = ride.info.get("childCount", 0)
-                for j in range(child_count):
-                    try:
-                        child = ride.child(index=j)
-                        text = child.info.get("text", "").strip()
-                        if text:
-                            print(f"  - {text}")
-                    except Exception as e:
-                        print(f"  ⚠️ Error reading child {j}: {e}")
+                for sub in item.iter():
+                    rid = sub.attrib.get("resource-id", "")
+                    text = sub.attrib.get("text", "").strip()
+
+                    # Extract data based on known IDs
+                    if rid.endswith("xsell_confirmation_service_view"):
+                        ride_info["title"] = text
+                    elif rid.endswith("xsell_confirmation_taxi_type_subtitle"):
+                        ride_info["subtitle"] = text
+                    elif text.startswith("S$"):  # A possible price pattern
+                        ride_info["price"] = text
+
+                print(ride_info)
 
         # Continue automation like booking ride
         print("📲 Proceeding to book ride...")
