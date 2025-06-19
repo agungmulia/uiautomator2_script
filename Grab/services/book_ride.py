@@ -1,20 +1,27 @@
 # book_ride.py
-
+import threading
+import time
 import uiautomator2 as u2
 from general import check_login_status, clear_unexpected_popups, accept_permissions, notify_n8n
 
-def book_ride_handler(destination, pickup_time):
-    print(f"🚖 Booking ride to {destination} at {pickup_time}...")
+def book_ride_handler(booking_option):
+    print(f"🚖 Booking ride...")
     try:
         d = u2.connect()
         d.app_start("com.grabtaxi.passenger") 
-        accept_permissions(d)
+        threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
+        threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
 
         # Call login checker
         if not check_login_status(d):
             raise Exception("User is not logged in. Please log in to continue.")
         
-        clear_unexpected_popups(d)
+        option = d(textMatches=f"(?i)^{booking_option}$").click()
+        if option.exists(timeout=0.3):
+            print(option)
+            option.click()
+            time.sleep(0.3)
+
 
         # Continue automation like booking ride
         print("📲 Proceeding to book ride...")
