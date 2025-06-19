@@ -36,7 +36,31 @@ def confirmation_check_handler(destination, pickup_time):
 
         time.sleep(1) # Wait for the UI to update
         ride_items = d(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_item_container")
-        print(ride_items)
+        rides = []
+        for ride in ride_items:
+            # Inside each ride block, look for sub-elements
+            try:
+                title = ride.child(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_type_name").get_text()
+                eta = ride.child(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_taxi_type_subtitle").get_text()
+                
+                # Try to get price — if it doesn't have resource-id, use `.child(className="android.widget.TextView")` fallback
+                price = ""
+                for sub in ride.iter():
+                    text = sub.info.get("text", "")
+                    if text.startswith("S$"):
+                        price = text
+                        break
+
+                rides.append({
+                    "title": title,
+                    "eta": eta,
+                    "price": price
+                })
+
+            except Exception as e:
+                print("⚠️ Error parsing ride:", e)
+
+        print(rides)
         xml_dump = d.dump_hierarchy()
         tree = ET.fromstring(xml_dump)
         ride_infos = []
