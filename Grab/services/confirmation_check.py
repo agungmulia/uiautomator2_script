@@ -33,7 +33,6 @@ def confirmation_check_handler(destination, pickup_time):
 
         time.sleep(1) # Wait for the UI to update
 
-        print(sess(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view", instance=0).all) 
         time.sleep(1) # Wait for the UI to update
 
         print(sess(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_service_view", instance=0).child()) 
