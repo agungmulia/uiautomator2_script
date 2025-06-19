@@ -28,19 +28,19 @@ def check_price(destination, pickup_time):
         if ride_comp is not None:
             ride_coord = coordinate_bounds(ride_comp["bounds"])
             d.click(*ride_coord)
-        if not d(resourceId="txtInputDestination").exists():
+        while not d(resourceId="txtInputDestination").exists():
             time.sleep(0.1)
         time.sleep(0.5)
         d(resourceId="txtInputDestination").click()
         
-        if not d(text="Where to?").exists():
+        while not d(text="Where to?").exists():
             time.sleep(0.1)
         time.sleep(0.3)
         d(text="Where to?").send_keys(destination)
         screen_components(d)
 
         # choose first element in the search list
-        if not d(resourceId="com.codigo.comfort:id/lblRecentLocationAddress").exists():
+        while not d(resourceId="com.codigo.comfort:id/lblRecentLocationAddress").exists():
             time.sleep(0.1)
         time.sleep(0.5)
         search_res_comps = find_components_by_id(d, "com.codigo.comfort:id/lblRecentLocationAddress")
@@ -50,13 +50,13 @@ def check_price(destination, pickup_time):
             d.click(*search_res_coord)
 
         # # confirm pick up
-        if not d(resourceId="btnConfirmPickUp").exists():
+        while not d(resourceId="btnConfirmPickUp").exists():
             time.sleep(0.1)
         time.sleep(0.5)
         d(resourceId="btnConfirmPickUp").click()
 
 
-        if not d(resourceId="com.codigo.comfort:id/tvApplicableFare").exists():
+        while not d(resourceId="com.codigo.comfort:id/tvApplicableFare").exists():
             time.sleep(0.1)
         time.sleep(0.5)
         # choose cheapest fare
@@ -77,9 +77,18 @@ def check_price(destination, pickup_time):
             "price": extract_price(cheapest["text"])
         }
 
-        
-        
+        # while not d(resourceId="com.codigo.comfort:id/btnBookNow").exists():
+        #     time.sleep(0.1)
+        # time.sleep(0.2)
+        # d(resourceId="com.codigo.comfort:id/btnBookNow").click()
 
+        # cancel trip
+        # d(scrollable=True).scroll.toEnd()
+        # while not d(resourceId="com.codigo.comfort:id/btnCancelTrip").exists():
+        #         time.sleep(0.1)
+        # time.sleep(0.3)
+        # d(resourceId="com.codigo.comfort:id/btnCancelTrip").click() # cancel
+        # TODO: check cancel dropdown options then click then submit
 
 
 

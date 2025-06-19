@@ -6,7 +6,13 @@ def cancel_ride():
         d = u2.connect()
         # sess = d.session("com.gojek.app") 
         d.app_start("com.codigo.comfort", stop=False)
-
+        # cancel trip
+        d(scrollable=True).scroll.toEnd()
+        while not d(resourceId="com.codigo.comfort:id/btnCancelTrip").exists():
+                time.sleep(0.1)
+        time.sleep(0.3)
+        d(resourceId="com.codigo.comfort:id/btnCancelTrip").click() # cancel
+        # TODO: check cancel dropdown options then click then submit
     except Exception as e:
         # d = u2.connect()
         # sess = d.session("org.telegram.messenger") 

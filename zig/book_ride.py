@@ -7,6 +7,11 @@ def book_ride(destination, pickup_time):
         d = u2.connect()
         # sess = d.session("com.gojek.app") 
         d.app_start("com.codigo.comfort", stop=False)
+        while not d(resourceId="com.codigo.comfort:id/btnBookNow").exists():
+            time.sleep(0.1)
+        time.sleep(0.2)
+        d(resourceId="com.codigo.comfort:id/btnBookNow").click()
+        # TODO: check if the book is successful
         
     except Exception as e:
         # d = u2.connect()
