@@ -4,8 +4,8 @@ from utils import check_login_status, clear_unexpected_popups, accept_permission
 def check_price(destination, pickup_time):
     try:
         d = u2.connect()
-        sess = d.session("com.gojek.app") 
-        # d.app_start("com.gojek.app", stop=False)
+        # sess = d.session("com.gojek.app") 
+        d.app_start("com.gojek.app", stop=True)
         accept_permissions(d)
         clear_unexpected_popups(d)
 
@@ -61,23 +61,20 @@ def check_price(destination, pickup_time):
         while not d(resourceId="com.gojek.app:id/text_service_pricing").exists():
             time.sleep(0.1)
         time.sleep(0.5)
-        
-        comps = find_components_by_id(d, "com.gojek.app:id/text_service_pricing")
-        # comps[i].text is the price with this fomatting "S$5.00", find the cheapest in the comps list, and return the element of the list, not only the price
-        cheapest = min(comps, key=lambda x: float(x["text"].replace("S$", "")))
-        print(coordinate_bounds(cheapest["bounds"]))
-        center_x, center_y = coordinate_bounds(cheapest["bounds"])
-        d.click(center_x, center_y)
-        time.sleep(0.3)
-        screen_components(d)
 
-        print(comps)
-        print(cheapest)
+        foryouComp = find_components(d, "For you")
+        foryouCoord = coordinate_bounds(foryouComp["bounds"])
+        d.click(*foryouCoord)
+        time.sleep(0.5)
 
-        return {
-            "ride": "gojek",
-            "price": float(cheapest["text"].replace("S$", "")),
-        }
+        # get all rides
+        titleComps = find_components_by_id(d, "com.gojek.app:id/2131378741")
+        priceComps = find_components_by_id(d, "com.gojek.app:id/text_service_pricing")
+
+        rides = [{"title": titleComp["text"], "price": priceComp["text"]} for titleComp, priceComp in zip(titleComps, priceComps)]
+        print(rides)
+
+        return rides
 
 
     except Exception as e:
