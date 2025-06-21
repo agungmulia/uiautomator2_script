@@ -7,14 +7,6 @@ def check_login_status(d):
     Raises exception if something goes wrong.
     """
     try:
-        print("=== DEBUG: Checking login status ===")
-        # First, wait briefly for the main screen or login prompt to load
-        time.sleep(2) 
-        print("=== DEBUG: All clickable elements ===")
-        for el in d.xpath("//*").all():
-            text = el.attrib.get("text", "").strip()
-            if text:
-                print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
         # Look for login screen indicators
         login_keywords = ["login", "sign in", "log in"]
         for keyword in login_keywords:
@@ -151,7 +143,7 @@ def find_components(d, text: str):
     import xml.etree.ElementTree as ET
     root = ET.fromstring(xml)
     for node in root.iter():
-        if node.attrib.get("text").lower() == text:  # Only include Android widgets
+        if node.attrib.get("text") is not None and node.attrib.get("text").lower() == text:  # Only include Android widgets
             res_id = node.attrib.get("resource-id", "")
             text = node.attrib.get("text", "")
             return {

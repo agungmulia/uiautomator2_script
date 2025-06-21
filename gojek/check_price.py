@@ -1,6 +1,6 @@
 import uiautomator2 as u2
 import time
-from utils import check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds
+from .utils import check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds
 def check_price(destination, pickup_time):
     try:
         d = u2.connect()
@@ -27,42 +27,27 @@ def check_price(destination, pickup_time):
         time.sleep(1)
         d(resourceId="com.gojek.app:id/2131380508").click() # click first element in the list
         
-        while not d(resourceId="com.gojek.app:id/2131381640").exists():
-            time.sleep(0.1)
-            print("waiting for next button")
-        time.sleep(0.5)
-        d(resourceId="com.gojek.app:id/2131381640").click() # next on pick up location
+
+        # while not d(text="Select via map").exists():
+        #     time.sleep(0.1)
         # time.sleep(0.5)
-
-        while not d(text="Select via map").exists():
-            time.sleep(0.1)
-        time.sleep(0.5)
-        d(text="Select via map").click() # this element has no id, just use text
-        # time.sleep(1.5)
+        # d(text="Select via map").click() # this element has no id, just use text
+        # # time.sleep(1.5)
 
         while not d(resourceId="com.gojek.app:id/2131381640").exists():
             time.sleep(0.1)
             print("waiting for next button")
         time.sleep(0.5)
 
-        elNext = find_components(d, "Next")
-        x1, y1, x2, y2 = map(int, elNext["bounds"].strip("[]").replace("][", ",").split(","))
-        # Calculate center (x, y)
-        center_x = (x1 + x2) // 2 
-        center_y = (y1 + y2) // 2 
-        d.click(center_x, center_y)
-        # TODO: fetch price list
-
-        # swipe from bottom to top
-        w, h = d.window_size()
-        print(w, h)
-        d.swipe(w * 0.5, h * 0.7, w * 0.5, h * 0.3, 0.3)
+        elNext = find_components(d, "next")
+        nextCoord = coordinate_bounds(elNext["bounds"])
+        d.click(*nextCoord)
         
         while not d(resourceId="com.gojek.app:id/text_service_pricing").exists():
             time.sleep(0.1)
         time.sleep(0.5)
 
-        foryouComp = find_components(d, "For you")
+        foryouComp = find_components(d, "for you")
         foryouCoord = coordinate_bounds(foryouComp["bounds"])
         d.click(*foryouCoord)
         time.sleep(0.5)

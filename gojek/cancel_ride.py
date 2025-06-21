@@ -1,6 +1,6 @@
 import uiautomator2 as u2
 import time
-from utils import check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds
+from .utils import check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds
 def cancel_ride():
     try:
         d = u2.connect()
