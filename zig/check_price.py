@@ -1,7 +1,7 @@
 import uiautomator2 as u2
 import time
 import re
-from utils import select_language, check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds, find_components_by_drawing_order
+from .utils import select_language, check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds, find_components_by_drawing_order
 def check_price(destination, pickup_time):
     try:
         print("init check price")
