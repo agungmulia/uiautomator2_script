@@ -11,10 +11,7 @@ def check_price(destination, pickup_time):
         clear_unexpected_popups(d)
         # select language
         accept_permissions(d)
-        print("debug screen components")
 
-        # screen_components(d)
-        
         select_language(d)
 
         if not check_login_status(d):
@@ -59,23 +56,18 @@ def check_price(destination, pickup_time):
         while not d(resourceId="com.codigo.comfort:id/tvApplicableFare").exists():
             time.sleep(0.1)
         time.sleep(0.5)
-        # choose cheapest fare
-        fare_comps = find_components_by_id(d, "com.codigo.comfort:id/tvApplicableFare")
-        # Filter to only those with single-price format
-        single_price_comps = [c for c in fare_comps if is_single_price(c["text"])]
-        # Get the one with the lowest price
-        cheapest = min(single_price_comps, key=lambda x: extract_price(x["text"]))
-        print(coordinate_bounds(cheapest["bounds"]))
-        center_x, center_y = coordinate_bounds(cheapest["bounds"])
-        d.click(center_x, center_y)
-        print({
-            "price": extract_price(cheapest["text"]),
-            "pickup_time": pickup_time
-        })
-        return {
-            "ride": "Zig",
-            "price": extract_price(cheapest["text"])
-        }
+
+        fareDescs = find_components_by_id(d, "com.codigo.comfort:id/tvFareDescription")
+        fareSubDescs = find_components_by_id(d, "com.codigo.comfort:id/tvFareSubDescription")
+        fares = find_components_by_id(d, "com.codigo.comfort:id/tvApplicableFare")
+        # # make a dict with title and price field, where title is fareDesc + fareSubDesc
+        rides = []
+        for i in range(len(fareDescs)):
+            rides.append({
+                "title": fareDescs[i]["text"] + " " + fareSubDescs[i]["text"],
+                "price": fares[i]["text"]
+            })
+        return rides
 
         # while not d(resourceId="com.codigo.comfort:id/btnBookNow").exists():
         #     time.sleep(0.1)
@@ -89,7 +81,6 @@ def check_price(destination, pickup_time):
         # time.sleep(0.3)
         # d(resourceId="com.codigo.comfort:id/btnCancelTrip").click() # cancel
         # TODO: check cancel dropdown options then click then submit
-
 
 
     except Exception as e:

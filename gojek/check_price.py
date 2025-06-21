@@ -20,7 +20,7 @@ def check_price(destination, pickup_time):
         while not d(resourceId="com.gojek.app:id/2131367370").exists():
             time.sleep(0.1)
             print("waiting for search bar")
-        d(resourceId="com.gojek.app:id/2131367370").send_keys("airport") # resource id for destination search bar
+        d(resourceId="com.gojek.app:id/2131367370").send_keys(destination) # resource id for destination search bar
         while not d(resourceId="com.gojek.app:id/2131380508").exists():
             time.sleep(0.1)
             print("waiting for list")
