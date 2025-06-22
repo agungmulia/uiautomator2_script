@@ -1,5 +1,10 @@
 import time
 import re
+
+def select_language(d):
+    if d(text="Select Language").exists():
+        d(text="English").click()
+
 def check_login_status(d):
     """
     Checks whether the user is logged in to the Grab app.
@@ -7,27 +12,19 @@ def check_login_status(d):
     Raises exception if something goes wrong.
     """
     try:
+        print("=== DEBUG: Checking login status ===")
+        # First, wait briefly for the main screen or login prompt to load
         # Look for login screen indicators
-        login_keywords = ["login", "sign in", "log in"]
+        for el in d.xpath("//*").all():
+            text = el.attrib.get("text", "").strip()
+            if text:
+                print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
+        login_keywords = ["login", "sign in", "log in", "send code to sms"]
+
         for keyword in login_keywords:
-            if d(textMatches=f"(?i)^{keyword}$").exists():
+            if d(textMatches=fr"(?i).*{keyword}.*").exists:
                 print("❌ Not logged in. Please log in first.")
                 return False
-
-        # Look for home screen keywords as positive signal
-        home_keywords = ["search", "redeem", "adventure"]
-        for el in d.xpath("//*").all():
-                        try:
-                            text = el.attrib.get("text", "").strip().lower()
-                            if not text:
-                                continue
-
-                            for keyword in home_keywords:
-                                if keyword in text:
-                                    return True
-                        except Exception as e:
-                            print("⚠️ Could not determine login status. Assuming not logged in.")
-                            return False
 
     except Exception as e:
         print(f"[Error] Failed to check login status: {e}")
@@ -85,12 +82,11 @@ def accept_permissions(d):
     """
     print("=== DEBUG: Checking permissions ===")
     yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome"]
-    time.sleep(2)
 
     try:
         
-        for _ in range(5):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=0.5) or d(textContains="welcome").wait(timeout=0.5):
+        for _ in range(4):  # Multiple attempts in case of multiple layers
+            if d(textContains="access").wait(timeout=0.3) or d(textContains="welcome").wait(timeout=0.3):
                     print("Found text with 'access'")
                     for el in d.xpath("//*").all():
                         try:
@@ -143,7 +139,7 @@ def find_components(d, text: str):
     import xml.etree.ElementTree as ET
     root = ET.fromstring(xml)
     for node in root.iter():
-        if node.attrib.get("text") is not None and node.attrib.get("text").lower() == text:  # Only include Android widgets
+        if node.attrib.get("text").lower() == text:  # Only include Android widgets
             res_id = node.attrib.get("resource-id", "")
             text = node.attrib.get("text", "")
             return {
