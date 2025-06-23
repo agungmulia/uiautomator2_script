@@ -1,5 +1,6 @@
 import time
 import re
+import xml.etree.ElementTree as ET
 
 def app_launch(d):
     try:
@@ -12,19 +13,16 @@ def app_launch(d):
 
         # Look for home screen keywords as positive signal
         home_keywords = ["search", "redeem", "adventure"]
-        for el in d.xpath("//*").all():
-                        try:
-                            text = el.attrib.get("text", "").strip().lower()
-                            if not text:
-                                return False
-
-                            for keyword in home_keywords:
-                                if keyword in text:
-                                    return True
-                        except Exception as e:
-                            print("waiting for launch")
-                            return False
-
+        xml = d.dump_hierarchy()  # Get UI XML
+        root = ET.fromstring(xml)
+        for node in root.iter():
+            print("node", node.attrib)
+            if node.attrib.get("text") is not None:  # Only include Android widgets
+                text = node.attrib.get("text", "")
+                for keyword in home_keywords:
+                        if keyword in text:
+                            return True
+        return False
     except Exception as e:
         print("waiting for launch")
         return False
