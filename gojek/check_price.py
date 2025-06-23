@@ -53,9 +53,12 @@ def check_price(destination, pickup_time):
         time.sleep(0.5)
 
         # get all rides
+        while not d(resourceId="com.gojek.app:id/text_service_pricing").exists():
+            time.sleep(0.1)
+        time.sleep(0.3)
         titleComps = find_components_by_id(d, "com.gojek.app:id/2131378741")
         priceComps = find_components_by_id(d, "com.gojek.app:id/text_service_pricing")
-
+        rides = []
         rides = [{"title": titleComp["text"], "price": priceComp["text"]} for titleComp, priceComp in zip(titleComps, priceComps)]
         print(rides)
 

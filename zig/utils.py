@@ -12,13 +12,6 @@ def check_login_status(d):
     Raises exception if something goes wrong.
     """
     try:
-        print("=== DEBUG: Checking login status ===")
-        # First, wait briefly for the main screen or login prompt to load
-        # Look for login screen indicators
-        for el in d.xpath("//*").all():
-            text = el.attrib.get("text", "").strip()
-            if text:
-                print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
         login_keywords = ["login", "sign in", "log in", "send code to sms"]
 
         for keyword in login_keywords:
@@ -40,18 +33,13 @@ def clear_unexpected_popups(d):
     yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome", "later"]
 
     try:
-        print("=== DEBUG: All clickable elements ===")
         texts = []
         for el in d.xpath("//*").all():
             text = el.attrib.get("text", "").strip()
             texts.append(text.lower())
-            if text:
-                print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
-        print("texts:", texts)
         for _ in range(3):  # Multiple attempts in case of multiple layers
             
             if any("welcome" in t.lower() for t in texts):
-                    print("Found text with 'welcome'")
                     for el in d.xpath("//*").all():
                         try:
                             text = el.attrib.get("text", "").strip().lower()
@@ -92,7 +80,6 @@ def accept_permissions(d):
         
         for _ in range(4):  # Multiple attempts in case of multiple layers
             if d(textContains="access").wait(timeout=0.3) or d(textContains="welcome").wait(timeout=0.3) or d(textContains="Go Cashless"):
-                    print("Found text with 'access'")
                     for el in d.xpath("//*").all():
                         try:
                             text = el.attrib.get("text", "").strip().lower()

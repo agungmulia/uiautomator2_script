@@ -41,16 +41,11 @@ def clear_unexpected_popups(d):
     print("=== DEBUG: Checking popups ===")
 
     yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome"]
-
-    try:
-        print("=== DEBUG: All clickable elements ===")
-        texts = []
-        for el in d.xpath("//*").all():
+    texts = []
+    for el in d.xpath("//*").all():
             text = el.attrib.get("text", "").strip()
             texts.append(text.lower())
-            if text:
-                print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
-        print("texts:", texts)
+    try:
         for _ in range(3):  # Multiple attempts in case of multiple layers
             
             if any("welcome" in t.lower() for t in texts):
@@ -69,11 +64,6 @@ def clear_unexpected_popups(d):
                                     break  # stop after one match
                         except Exception as e:
                             print(f"[Error] While processing node: {e}")
-                    print("=== DEBUG: All clickable elements ===")
-                    for el in d.xpath("//*").all():
-                        text = el.attrib.get("text", "").strip()
-                        if text:
-                            print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
         print("=== DEBUG: Checking popups finished ===")
                     
     except Exception as e:
@@ -109,8 +99,6 @@ def accept_permissions(d):
                     print("=== DEBUG: All clickable elements ===")
                     for el in d.xpath("//*").all():
                         text = el.attrib.get("text", "").strip()
-                        if text:
-                            print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
         print("=== DEBUG: Checking permissions finished ===")
     except Exception as e:
         print(f"[Error] Unexpected error in popup cleanup: {e}")
