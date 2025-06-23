@@ -18,19 +18,22 @@ def confirmation_check_handler(destination, pickup_time):
         if not check_login_status(d):
             raise Exception("User is not logged in. Please log in to continue.")
         
-        time.sleep(1) 
-
+        while not sess(text="Transport").exists():
+            time.sleep(0.1)
         sess(text="Transport").click()
 
-        time.sleep(1)  # Wait for the UI to update
+        while not sess(text="Where to?").exists():
+            time.sleep(0.1)
         sess(text="Where to?").click()
         sess(resourceId="com.grabtaxi.passenger:id/poi_second_search").send_keys(destination)
 
-        time.sleep(1) # Wait for the UI to update
+        while not sess(resourceId="com.grabtaxi.passenger:id/list_item_with_additional_info_container_parent", instance=0).exists():
+            time.sleep(0.1) # Wait for the UI to update
         sess(resourceId="com.grabtaxi.passenger:id/list_item_with_additional_info_container_parent", instance=0).click()
         sess(text="Choose This Pickup").click()
 
-        time.sleep(1) # Wait for the UI to update
+        while not sess(resourceId="com.grabtaxi.passenger:id/xsell_confirmation_item_container").exists():
+            time.sleep(0.1) # Wait for the UI to update
         xml_dump = d.dump_hierarchy()
         tree = ET.fromstring(xml_dump)
         ride_infos = []

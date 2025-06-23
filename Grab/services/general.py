@@ -48,10 +48,10 @@ def clear_unexpected_popups(d):
             for selector in closers:
                 try:
                     el = d(**selector)
-                    if el.exists(timeout=0.3):
+                    if el.exists(timeout=0.1):
                         el.click()
                         print(f"[Popup] Closed: {selector}")
-                        time.sleep(0.3)
+                        time.sleep(0.2)
                 except Exception as e:
                     print(f"[Warning] Error closing popup: {selector} → {e}")
     except Exception as e:
@@ -66,7 +66,7 @@ def accept_permissions(d):
 
     try:
         for _ in range(5):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=1):
+            if d(textContains="access").wait(timeout=0.1):
                     print("Found text with 'access'")
                     for selector in yes_word:
                         try:
