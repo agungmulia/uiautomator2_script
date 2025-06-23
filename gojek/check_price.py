@@ -1,11 +1,14 @@
 import uiautomator2 as u2
 import time
-from .utils import check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds
+from .utils import app_launch, check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds
 def check_price(destination, pickup_time):
     try:
         d = u2.connect()
         # sess = d.session("com.gojek.app") 
         d.app_start("com.gojek.app", stop=True)
+        # wait for the app launch
+        while not app_launch(d):
+            time.sleep(0.1)
         accept_permissions(d)
         clear_unexpected_popups(d)
 

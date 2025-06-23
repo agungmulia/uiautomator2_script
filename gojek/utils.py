@@ -1,5 +1,33 @@
 import time
 import re
+
+def app_launch(d):
+    try:
+        # Look for login screen indicators
+        login_keywords = ["login", "sign in", "log in"]
+        for keyword in login_keywords:
+            if d(textMatches=f"(?i)^{keyword}$").exists():
+                print("❌ Not logged in. Please log in first.")
+                return True
+
+        # Look for home screen keywords as positive signal
+        home_keywords = ["search", "redeem", "adventure"]
+        for el in d.xpath("//*").all():
+                        try:
+                            text = el.attrib.get("text", "").strip().lower()
+                            if not text:
+                                return False
+
+                            for keyword in home_keywords:
+                                if keyword in text:
+                                    return True
+                        except Exception as e:
+                            print("waiting for launch")
+                            return False
+
+    except Exception as e:
+        print("waiting for launch")
+        return False
 def check_login_status(d):
     """
     Checks whether the user is logged in to the Grab app.
