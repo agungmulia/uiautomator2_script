@@ -3,12 +3,10 @@ import time
 from .utils import app_launch, check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds
 def check_price(destination, pickup_time):
     try:
-        d = u2.connect()
+        d = u2.connect("localhost:5555")
         # sess = d.session("com.gojek.app") 
         d.app_start("com.gojek.app", stop=True)
-        # wait for the app launch
-        while not app_launch(d):
-            time.sleep(0.1)
+        time.sleep(2)
         accept_permissions(d)
         clear_unexpected_popups(d)
 

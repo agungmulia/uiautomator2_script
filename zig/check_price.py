@@ -34,7 +34,6 @@ def check_price(destination, pickup_time):
             time.sleep(0.1)
         # time.sleep(0.3)
         d(text="Where to?").send_keys(destination)
-        screen_components(d)
 
         # choose first element in the search list
         while not d(resourceId="com.codigo.comfort:id/lblRecentLocationAddress").exists():
