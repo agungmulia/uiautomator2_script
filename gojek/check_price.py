@@ -22,12 +22,12 @@ def check_price(destination, pickup_time):
             print("waiting for search bar")
         d(resourceId="com.gojek.app:id/2131367370").send_keys(destination) # resource id for destination search bar
         while not d(resourceId="com.gojek.app:id/2131380508").exists():
-            time.sleep(0.1)
+            time.sleep(0.2)
             print("waiting for list")
-        time.sleep(1)
+        # time.sleep()
         if d(resourceId="com.gojek.app:id/2131362500").exists(): # promo
             d(resourceId="com.gojek.app:id/2131362500").click()
-        time.sleep(0.3)
+        time.sleep(0.2)
         d(resourceId="com.gojek.app:id/2131380508").click() # click first element in the list
         
 
@@ -40,7 +40,7 @@ def check_price(destination, pickup_time):
         while not d(resourceId="com.gojek.app:id/2131381640").exists():
             time.sleep(0.1)
             print("waiting for next button")
-        time.sleep(0.5)
+        time.sleep(0.2)
 
         elNext = find_components(d, "next")
         nextCoord = coordinate_bounds(elNext["bounds"])
@@ -48,12 +48,11 @@ def check_price(destination, pickup_time):
         
         while not d(resourceId="com.gojek.app:id/text_service_pricing").exists():
             time.sleep(0.1)
-        time.sleep(0.5)
+        time.sleep(0.2)
 
         foryouComp = find_components(d, "for you")
         foryouCoord = coordinate_bounds(foryouComp["bounds"])
         d.click(*foryouCoord)
-        time.sleep(0.5)
 
         # get all rides
         while not d(resourceId="com.gojek.app:id/text_service_pricing").exists():

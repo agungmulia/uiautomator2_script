@@ -7,7 +7,7 @@ def check_price(destination, pickup_time):
         print("init check price")
         d = u2.connect()
         d.app_start("com.codigo.comfort", stop=True)
-        time.sleep(2)
+        time.sleep(1)
         clear_unexpected_popups(d)
         # select language
         accept_permissions(d)
@@ -27,19 +27,19 @@ def check_price(destination, pickup_time):
             d.click(*ride_coord)
         while not d(resourceId="txtInputDestination").exists():
             time.sleep(0.1)
-        time.sleep(0.5)
+        # time.sleep(0.2)
         d(resourceId="txtInputDestination").click()
         
         while not d(text="Where to?").exists():
             time.sleep(0.1)
-        time.sleep(0.3)
+        # time.sleep(0.3)
         d(text="Where to?").send_keys(destination)
         screen_components(d)
 
         # choose first element in the search list
         while not d(resourceId="com.codigo.comfort:id/lblRecentLocationAddress").exists():
             time.sleep(0.1)
-        time.sleep(0.5)
+        # time.sleep(0.5)
         search_res_comps = find_components_by_id(d, "com.codigo.comfort:id/lblRecentLocationAddress")
         if search_res_comps is not None:
             search_res_comp = search_res_comps[0]
@@ -49,13 +49,13 @@ def check_price(destination, pickup_time):
         # # confirm pick up
         while not d(resourceId="btnConfirmPickUp").exists():
             time.sleep(0.1)
-        time.sleep(0.5)
+        # time.sleep(0.5)
         d(resourceId="btnConfirmPickUp").click()
 
 
         while not d(resourceId="com.codigo.comfort:id/tvApplicableFare").exists():
             time.sleep(0.1)
-        time.sleep(0.5)
+        # time.sleep(0.5)
 
         fareDescs = find_components_by_id(d, "com.codigo.comfort:id/tvFareDescription")
         fareSubDescs = find_components_by_id(d, "com.codigo.comfort:id/tvFareSubDescription")

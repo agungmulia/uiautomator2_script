@@ -79,7 +79,7 @@ def accept_permissions(d):
     try:
         
         for _ in range(4):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=0.3) or d(textContains="welcome").wait(timeout=0.3) or d(textContains="Go Cashless"):
+            if d(textContains="access").wait(timeout=0.1) or d(textContains="welcome").wait(timeout=0.1) or d(textContains="Go Cashless"):
                     for el in d.xpath("//*").all():
                         try:
                             text = el.attrib.get("text", "").strip().lower()

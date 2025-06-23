@@ -75,12 +75,11 @@ def accept_permissions(d):
     """
     print("=== DEBUG: Checking permissions ===")
     yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome"]
-    time.sleep(2)
 
     try:
         
-        for _ in range(5):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=0.5) or d(textContains="welcome").wait(timeout=0.5):
+        for _ in range(3):  # Multiple attempts in case of multiple layers
+            if d(textContains="access").wait(timeout=0.1) or d(textContains="welcome").wait(timeout=0.1):
                     print("Found text with 'access'")
                     for el in d.xpath("//*").all():
                         try:
