@@ -25,6 +25,9 @@ def check_price(destination, pickup_time):
             time.sleep(0.1)
             print("waiting for list")
         time.sleep(1)
+        if d(resourceId="com.gojek.app:id/2131362500").exists(): # promo
+            d(resourceId="com.gojek.app:id/2131362500").click()
+        time.sleep(0.3)
         d(resourceId="com.gojek.app:id/2131380508").click() # click first element in the list
         
 
