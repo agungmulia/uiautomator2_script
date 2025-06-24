@@ -25,7 +25,7 @@ def check_login_status(d):
             if d(textMatches=fr"(?i).*{keyword}.*").exists:
                 print("❌ Not logged in. Please log in first.")
                 return False
-
+        return True
     except Exception as e:
         print(f"[Error] Failed to check login status: {e}")
         return False
@@ -40,7 +40,9 @@ def clear_unexpected_popups(d):
     yes_word = ["ok", "yes", "turn on", "awesome", "skip", "no thanks", "dismiss"]
 
     try:
-        print("=== DEBUG: All clickable elements ===")
+        if d(resourceId="com.rydesharing.ryde:id/imv_float_close").exists():
+            close_comp = find_components_by_id(d, "com.rydesharing.ryde:id/imv_float_close")
+            d.click(*coordinate_bounds(close_comp[0]["bounds"]))
         texts = []
         for el in d.xpath("//*").all():
             text = el.attrib.get("text", "").strip()
