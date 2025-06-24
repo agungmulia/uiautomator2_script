@@ -1,3 +1,4 @@
 rsftpconfig.json
 rsftpbackups/
 sony_phone/
+*.pyc
