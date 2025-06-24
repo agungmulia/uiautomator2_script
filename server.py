@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler
+from ryde.service.check_price import check_price as ryde_check_price
 from gojek.check_price import check_price as gojek_check_price
 from gojek.book_ride import book_ride as gojek_book_ride
 from gojek.cancel_ride import cancel_ride as gojek_cancel_ride
@@ -113,13 +114,15 @@ def all_transport_app():
 
         result = []
         if action == "confirmation_check":
+            ryde_result = ryde_check_price(data.get("destination"), data.get("time"))
             grab_result = confirmation_check_handler(data.get("destination"), data.get("time"))
             gojek_result = gojek_check_price(data.get("destination"), data.get("time"))
             zig_result = zig_check_price(data.get("destination"), data.get("time"))
             result = {
                 "grab": grab_result,
                 "gojek": gojek_result,
-                "zig": zig_result
+                "zig": zig_result,
+                "ryde": ryde_result
             }
         else:
             return jsonify({"error": "Unknown action"}), 400
