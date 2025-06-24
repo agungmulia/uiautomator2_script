@@ -102,6 +102,35 @@ def zig():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
+@app.route("/ryde", methods=["POST"])
+def ryde():
+    try:
+        print("Received request:", request.json)
+        data = request.get_json()
+        action = data.get("action")
+        args = data.get("args", {})
+
+        # if action == "book_ride":
+        #     booking_option = data.get("booking_option")
+        #     result = zig_book_ride(booking_option)
+
+        # elif action == "order_food":
+        #     result = gojek(args.get("item"), args.get("quantity"))
+
+        if action == "confirmation_check":
+            result = ryde_check_price(data.get("destination"), data.get("time"))
+        # elif action == "cancel_ride":
+        #     result = zig_cancel_ride(data.get("destination"), data.get("time"))
+
+        else:
+            return jsonify({"error": "Unknown action"}), 400
+
+        print("Result:", result)
+
+        return jsonify({"message": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 @app.route("/all_transport_app", methods=["POST"])
 def all_transport_app():
     try:

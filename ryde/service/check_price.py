@@ -21,6 +21,13 @@ def check_price(destination, pickup_time):
         d(text="Where to?").click()
         while not d(text="Enter dropoff location").exists():
             time.sleep(0.1)
+
+        # # mock location
+        # start_comp = find_components_by_id(d, "com.rydesharing.ryde:id/tv_start")[0]
+        # d.click(*coordinate_bounds(start_comp["bounds"]))
+        # loc_comp = find_components(d, "british council (napier road centre)")
+        # d.click(*coordinate_bounds(loc_comp["bounds"]))
+        
         d(resourceId="com.rydesharing.ryde:id/tv_stop").send_keys(destination)
         # pick the 1st element in the list
         # while not d(resourceId="com.rydesharing.ryde:id/tv_address").exists():
