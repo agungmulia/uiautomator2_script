@@ -21,7 +21,8 @@ def grab():
         args = data.get("args", {})
 
         if action == "book_ride":
-            result = book_ride_handler(data.get("destination"), data.get("time"))
+            booking_option = data.get("booking_option")
+            result = book_ride_handler(booking_option)
 
         elif action == "order_food":
             result = order_food_handler(args.get("item"), args.get("quantity"))
@@ -47,7 +48,8 @@ def gojek():
         args = data.get("args", {})
 
         if action == "book_ride":
-            result = gojek_book_ride(data.get("destination"), data.get("time"))
+            ride = data.get("booking_option")
+            result = gojek_book_ride(ride)
 
         # elif action == "order_food":
         #     result = gojek(args.get("item"), args.get("quantity"))
