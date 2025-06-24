@@ -75,7 +75,8 @@ def zig():
         args = data.get("args", {})
 
         if action == "book_ride":
-            result = zig_book_ride(data.get("destination"), data.get("time"))
+            booking_option = data.get("booking_option")
+            result = zig_book_ride(booking_option)
 
         # elif action == "order_food":
         #     result = gojek(args.get("item"), args.get("quantity"))

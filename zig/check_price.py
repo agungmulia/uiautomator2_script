@@ -63,7 +63,7 @@ def check_price(destination, pickup_time):
         rides = []
         for i in range(len(fareDescs)):
             rides.append({
-                "title": fareDescs[i]["text"] + " " + fareSubDescs[i]["text"],
+                "title": fareDescs[i]["text"] + fareSubDescs[i]["text"],
                 "price": fares[i]["text"]
             })
         return rides
