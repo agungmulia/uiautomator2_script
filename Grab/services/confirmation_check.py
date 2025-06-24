@@ -55,7 +55,6 @@ def confirmation_check_handler(destination, pickup_time):
 
                 ride_infos.append(ride_info)
         print("📲 Ride confirmation success...")
-        d.app_start("org.telegram.messenger")
         return (ride_infos)
     except Exception as e:
         d = u2.connect()
