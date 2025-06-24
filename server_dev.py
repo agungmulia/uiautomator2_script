@@ -2,9 +2,7 @@ from flask import Flask, request, jsonify
 from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler
 from gojek.check_price import check_price as gojek_check_price
 from gojek.book_ride import book_ride as gojek_book_ride
-from gojek.cancel_ride import cancel_ride as gojek_cancel_ride
 from zig.check_price import check_price as zig_check_price
-from zig.cancel_ride import cancel_ride as zig_cancel_ride
 from zig.book_ride import book_ride as zig_book_ride
 import time
 app = Flask(__name__)
@@ -24,15 +22,13 @@ def grab():
 
         if action == "book_ride":
             booking_option = data.get("booking_option")
-            result = book_ride_handler(booking_option)
+            # result = book_ride_handler(booking_option)
 
         elif action == "order_food":
             result = order_food_handler(args.get("item"), args.get("quantity"))
 
         elif action == "confirmation_check":
             result = confirmation_check_handler(data.get("destination"), data.get("time"))
-        # elif action == "cancel_ride":
-        #     result = confirmation_check_handler(data.get("destination"), data.get("time"))
 
         else:
             return jsonify({"error": "Unknown action"}), 400
@@ -53,7 +49,8 @@ def gojek():
 
         if action == "book_ride":
             ride = data.get("booking_option")
-            result = gojek_book_ride(ride)
+            # result = gojek_book_ride(ride)
+            result = {"ride": ride, "waiting_time": "11 mins", "status": "success"}
 
         # elif action == "order_food":
         #     result = gojek(args.get("item"), args.get("quantity"))
@@ -61,7 +58,8 @@ def gojek():
         elif action == "confirmation_check":
             result = gojek_check_price(data.get("destination"), data.get("time"))
         elif action == "cancel_ride":
-            result = gojek_cancel_ride()
+            # result = gojek_check_price(data.get("destination"), data.get("time"))
+            result = {"status": "success", "message": "Ride cancelled"}
 
         else:
             return jsonify({"error": "Unknown action"}), 400
@@ -82,7 +80,9 @@ def zig():
 
         if action == "book_ride":
             booking_option = data.get("booking_option")
-            result = zig_book_ride(booking_option)
+            # result = zig_book_ride(booking_option)
+            
+            result = {"ride": booking_option, "waiting_time": "11 mins", "status": "success"}
 
         # elif action == "order_food":
         #     result = gojek(args.get("item"), args.get("quantity"))
@@ -90,7 +90,8 @@ def zig():
         elif action == "confirmation_check":
             result = zig_check_price(data.get("destination"), data.get("time"))
         elif action == "cancel_ride":
-            result = zig_cancel_ride(data.get("destination"), data.get("time"))
+            # result = zig_check_price(data.get("destination"), data.get("time"))
+            result = {"status": "success", "message": "Ride cancelled"}
 
         else:
             return jsonify({"error": "Unknown action"}), 400
@@ -113,13 +114,28 @@ def all_transport_app():
 
         result = []
         if action == "confirmation_check":
-            grab_result = confirmation_check_handler(data.get("destination"), data.get("time"))
-            gojek_result = gojek_check_price(data.get("destination"), data.get("time"))
-            zig_result = zig_check_price(data.get("destination"), data.get("time"))
+            # grab_result = confirmation_check_handler(data.get("destination"), data.get("time"))
+            # gojek_result = gojek_check_price(data.get("destination"), data.get("time"))
+            # zig_result = zig_check_price(data.get("destination"), data.get("time"))
+            # result = {
+            #     "grab": grab_result,
+            #     "gojek": gojek_result,
+            #     "zig": zig_result
+            # }
             result = {
-                "grab": grab_result,
-                "gojek": gojek_result,
-                "zig": zig_result
+                "grab": [{
+                        "title": "premium | 6 seats",
+                        "price": "$15.00",
+                    }],
+                "gojek": [{
+                        "title": "gocar",
+                        "price": "$11.00",
+                    }],
+                "zig": [{
+                        "title": "Taxi or car (flat fare)",
+                        "price": "$12.00",
+                    }],
+
             }
         else:
             return jsonify({"error": "Unknown action"}), 400

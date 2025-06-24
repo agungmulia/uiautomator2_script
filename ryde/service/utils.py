@@ -37,7 +37,7 @@ def clear_unexpected_popups(d):
     """
     print("=== DEBUG: Checking popups ===")
 
-    yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome"]
+    yes_word = ["ok", "yes", "turn on", "awesome", "skip", "no thanks", "dismiss"]
 
     try:
         print("=== DEBUG: All clickable elements ===")
@@ -50,7 +50,8 @@ def clear_unexpected_popups(d):
         print("texts:", texts)
         for _ in range(3):  # Multiple attempts in case of multiple layers
             
-            if any("welcome" in t.lower() for t in texts):
+            if any(any(word in t.lower() for word in yes_word) for t in texts):
+                    print("yang ini gan")
                     print("Found text with 'welcome'")
                     for el in d.xpath("//*").all():
                         try:
@@ -60,7 +61,9 @@ def clear_unexpected_popups(d):
 
                             for keyword in yes_word:
                                 if keyword in text:
-                                    print(f"[Match] Trying to click: '{text}'")
+                                    if keyword == "ok" and text == "facebook":
+                                        continue
+                                    print(f"[Match] Trying to click: '{text}' {keyword}")
                                     el.click()
                                     print(f"[Clicked] Matched: {text}")
                                     break  # stop after one match
@@ -86,7 +89,7 @@ def accept_permissions(d):
     try:
         
         for _ in range(4):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=0.3) or d(textContains="welcome").wait(timeout=0.3):
+            if d(textContains="access").wait(timeout=0.2):
                     print("Found text with 'access'")
                     for el in d.xpath("//*").all():
                         try:

@@ -1,15 +1,18 @@
 import uiautomator2 as u2
 import time
+import threading
 from utils import select_language, check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds
 def check_price(destination, pickup_time):
     try:
         print("init check price")
         d = u2.connect()
-        d.app_start("com.rydesharing.ryde", stop=False)
+        d.app_start("com.rydesharing.ryde", stop=True)
         time.sleep(2)
+        while not d(textMatches=r"(?i).*ryde.*").exists():
+            time.sleep(0.1)
+        threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
+        threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
         # select language
-        accept_permissions(d)
-
         select_language(d)
 
         if not check_login_status(d):
