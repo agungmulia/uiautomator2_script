@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler
 from ryde.service.check_price import check_price as ryde_check_price
+from ryde.service.book_ride import book_ride as ryde_book_ride
 from gojek.check_price import check_price as gojek_check_price
 from gojek.book_ride import book_ride as gojek_book_ride
 from gojek.cancel_ride import cancel_ride as gojek_cancel_ride
@@ -110,9 +111,9 @@ def ryde():
         action = data.get("action")
         args = data.get("args", {})
 
-        # if action == "book_ride":
-        #     booking_option = data.get("booking_option")
-        #     result = zig_book_ride(booking_option)
+        if action == "book_ride":
+            booking_option = data.get("booking_option")
+            result = ryde_book_ride(booking_option)
 
         # elif action == "order_food":
         #     result = gojek(args.get("item"), args.get("quantity"))

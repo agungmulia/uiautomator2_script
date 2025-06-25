@@ -16,6 +16,7 @@ def book_ride(ride):
                 print("chosen:", fareDescs[i]["text"] + fareSubDescs[i]["text"])
                 center_x, center_y = coordinate_bounds(fareDescs[i]["bounds"])
                 d.click(center_x, center_y)
+                break
 
         while not d(resourceId="com.codigo.comfort:id/btnBookNow").exists():
             time.sleep(0.1)
