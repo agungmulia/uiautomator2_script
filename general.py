@@ -144,6 +144,25 @@ def find_components(d, text: str):
                 "bounds": node.attrib.get("bounds", ""),
                 "clickable": node.attrib.get("clickable", "")
             }
+
+def find_components_by_class_text(d, class_name: str, text: str):
+    xml = d.dump_hierarchy()  # Get UI XML
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(xml)
+    for node in root.iter():
+        if node.attrib.get("text") is not None and node.attrib.get("class").lower() == class_name:
+            print("comparing:", node.attrib.get("text").lower(), text, node.attrib.get("class").lower(), class_name)
+            print(f"is it equal? {node.attrib.get('text').lower()} {text} {node.attrib.get('text').lower() == text}")
+        if node.attrib.get("text") is not None and node.attrib.get("class").lower() == class_name and text in node.attrib.get("text").lower():  # Only include Android widgets
+            res_id = node.attrib.get("resource-id", "")
+            text = node.attrib.get("text", "")
+            return {
+                "resource-id": res_id,
+                "text": text,
+                "class": node.attrib.get("class", ""),
+                "bounds": node.attrib.get("bounds", ""),
+                "clickable": node.attrib.get("clickable", "")
+            }
 def find_components_by_id(d, id: str):
     xml = d.dump_hierarchy()  # Get UI XML
     import xml.etree.ElementTree as ET
