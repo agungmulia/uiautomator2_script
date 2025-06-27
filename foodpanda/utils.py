@@ -161,7 +161,21 @@ def screen_components(d):
     for elem in elements:
         if elem["resource-id"] and elem["text"]:
             print(f"ID: {elem['resource-id']} | Text: '{elem['text']}' | Class: {elem['class']} | Bounds: {elem['bounds']} | Clickable: {elem['clickable']}")
-
+def find_components_by_class_text(d, class_name: str, text: str):
+    xml = d.dump_hierarchy()  # Get UI XML
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(xml)
+    for node in root.iter():
+        if node.attrib.get("text") is not None and node.attrib.get("class").lower() == class_name and text in node.attrib.get("text").lower():  # Only include Android widgets
+            res_id = node.attrib.get("resource-id", "")
+            text = node.attrib.get("text", "")
+            return {
+                "resource-id": res_id,
+                "text": text,
+                "class": node.attrib.get("class", ""),
+                "bounds": node.attrib.get("bounds", ""),
+                "clickable": node.attrib.get("clickable", "")
+            }
 def find_components(d, text: str):
     xml = d.dump_hierarchy()  # Get UI XML
     import xml.etree.ElementTree as ET
