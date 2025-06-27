@@ -1,6 +1,7 @@
 import time
 import requests
 import re
+
 def check_login_status(d):
     """
     Checks whether the user is logged in to the Grab app.
@@ -186,3 +187,13 @@ def coordinate_bounds(bounds: str):
     center_x = (x1 + x2) // 2 
     center_y = (y1 + y2) // 2 
     return center_x, center_y
+
+_cache = {}
+
+def cache_set(key, value):
+    """Store a value in the cache under `key`."""
+    _cache[key] = value
+
+def cache_get(key, default=None):
+    """Retrieve a value by `key` from the cache or return `default` if not present."""
+    return _cache.get(key, default)

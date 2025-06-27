@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler
 from ryde.service.check_price import check_price as ryde_check_price
 from ryde.service.book_ride import book_ride as ryde_book_ride
+from foodpanda.check_price import check_price as foodpanda_check_price
 from gojek.check_price import check_price as gojek_check_price
 from gojek.book_ride import book_ride as gojek_book_ride
 from gojek.cancel_ride import cancel_ride as gojek_cancel_ride
@@ -120,6 +121,33 @@ def ryde():
 
         if action == "confirmation_check":
             result = ryde_check_price(data.get("destination"), data.get("time"))
+        # elif action == "cancel_ride":
+        #     result = zig_cancel_ride(data.get("destination"), data.get("time"))
+
+        else:
+            return jsonify({"error": "Unknown action"}), 400
+
+        print("Result:", result)
+
+        return jsonify({"message": result})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/foodpanda", methods=["POST"])
+def foodpanda():
+    try:
+        print("Received request:", request.json)
+        data = request.get_json()
+        action = data.get("action")
+        args = data.get("args", {})
+
+        # if action == "order_food":
+        #     booking_option = data.get("booking_option")
+        #     result = ryde_book_ride(booking_option)
+
+        if action == "confirmation_check":
+            print(data)
+            result = foodpanda_check_price(data.get("restaurant"), data.get("dropoff"), data.get("order"))
         # elif action == "cancel_ride":
         #     result = zig_cancel_ride(data.get("destination"), data.get("time"))
 
