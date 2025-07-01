@@ -54,7 +54,7 @@ def check_login_status(d):
                         except Exception as e:
                             print("⚠️ Could not determine login status. Assuming not logged in.")
                             return False
-
+        return True
     except Exception as e:
         print(f"[Error] Failed to check login status: {e}")
         return False

@@ -9,28 +9,37 @@ def book_ride_handler(booking_option):
     try:
         d = u2.connect()
         d.app_start("com.grabtaxi.passenger") 
-        # threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
-        # threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
+        threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
+        threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
 
-        # # swipe up a bit to show more ride options
-        # width, height = d.window_size()
-        # d.swipe(
-        #     width // 2, int(height * 0.55),  # from (middle, 70% height)
-        #     width // 2, int(height * 0.5),  # to (middle, 50% height)
-        #     duration=0.2
-        # )
-        # time.sleep(0.5)
-        # titleComps = find_components_by_id(d, "com.grabtaxi.passenger:id/xsell_confirmation_taxi_type_name")
-        # # check where the titlecomps[i].text == ride
-        # for i in range(len(titleComps)):
-        #     if titleComps[i]["text"].lower() == booking_option.lower():
-        #         print("chosen:", titleComps[i]["text"])
-        #         center_x, center_y = coordinate_bounds(titleComps[i]["bounds"])
-        #         d.click(center_x, center_y)
-        #         break
-        # # # com.grabtaxi.passenger:id/transportBookButton - book button
-        # d(resourceId="com.grabtaxi.passenger:id/transportBookButton").click()
-        # time.sleep(0.3)
+        # swipe up a bit to show more ride options
+        width, height = d.window_size()
+        d.swipe(
+            width // 2, int(height * 0.55),  # from (middle, 70% height)
+            width // 2, int(height * 0.5),  # to (middle, 50% height)
+            duration=0.2
+        )
+        time.sleep(0.5)
+        titleComps = find_components_by_id(d, "com.grabtaxi.passenger:id/xsell_confirmation_taxi_type_name")
+        # check where the titlecomps[i].text == ride
+        for i in range(len(titleComps)):
+            if titleComps[i]["text"].lower() == booking_option.lower():
+                print("chosen:", titleComps[i]["text"])
+                center_x, center_y = coordinate_bounds(titleComps[i]["bounds"])
+                d.click(center_x, center_y)
+                break
+        
+        while not d(resourceId="com.grabtaxi.passenger:id/node_payment_tag_compose_view").exists():
+            time.sleep(0.1)
+        time.sleep(0.3)
+        payment_comp = d(resourceId="com.grabtaxi.passenger:id/node_payment_tag_compose_view")
+        bounds_raw = payment_comp.bounds()
+        bounds = f"[{bounds_raw[0]},{bounds_raw[1]}][{bounds_raw[2]},{bounds_raw[3]}]"
+        d.click(*coordinate_bounds(bounds))
+        
+        # # com.grabtaxi.passenger:id/transportBookButton - book button
+        d(resourceId="com.grabtaxi.passenger:id/transportBookButton").click()
+        time.sleep(0.3)
 
         # wait for looking for ride
         while not d(resourceId="com.grabtaxi.passenger:id/driverProfileContainer").exists():

@@ -4,13 +4,82 @@ from gojek.check_price import check_price as gojek_check_price
 from gojek.book_ride import book_ride as gojek_book_ride
 from zig.check_price import check_price as zig_check_price
 from zig.book_ride import book_ride as zig_book_ride
+from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result
 import time
+from dataclasses import asdict
+import random
 app = Flask(__name__)
 
 @app.route("/ping", methods=["GET"])
 def ping():
     return "API is running", 200
 
+@app.route("/transport/flow", methods=["POST"])
+def transport_flow():
+    req = request.get_json()
+
+    flow = req.get("flow")
+    step = req.get("step")
+    raw_data = req.get("data", {})
+
+    data = TransportBookingData(
+        pickup_location=raw_data.get("pickup_location"),
+        destination=raw_data.get("destination"),
+        time=raw_data.get("time", "now"),
+        app=raw_data.get("app"),
+        payment_method=raw_data.get("payment_method"),
+        confirmation_check_done=raw_data.get("confirmation_check_done", False),
+        booking_options=parse_booking_options(raw_data.get("booking_options", [])),
+        selected_option=parse_selected_option(raw_data.get("selected_option")),
+        booking_result=parse_booking_result(raw_data.get("booking_result")),
+        cancelled=raw_data.get("cancelled", False)
+    )
+
+    state = FlowState(flow="transport_booking", step=step, data=data)
+
+    # FSM Logic
+    if state.step == "awaiting_missing_info":
+        if state.data.destination:
+            state.step = "confirmation_check_pending"
+
+    elif state.step == "confirmation_check_pending":
+        state.data.booking_options = [
+            BookingOption(title="JustGrab", app="grab", price=50000, option_id="justgrab-grab-001"),
+            BookingOption(title="GoCar", app="gojek", price=48000, option_id="gocar-gojek-002")
+        ]
+        state.data.confirmation_check_done = True
+        state.step = "awaiting_user_confirmation"
+
+    elif state.step == "awaiting_user_confirmation":
+        if state.data.selected_option:
+            if not state.data.payment_method:
+                state.step = "ask_payment_method"
+            else:
+                state.step = "booking_in_progress"
+
+    elif state.step == "ask_payment_method":
+        if state.data.payment_method:
+            state.step = "booking_in_progress"
+
+    elif state.step == "booking_in_progress":
+        waiting_time = random.randint(5, 15)
+        state.data.booking_result = BookingResult(status="success", waiting_time=waiting_time)
+        state.step = "handle_waiting_time"
+
+    elif state.step == "handle_waiting_time":
+        if state.data.booking_result and state.data.booking_result.waiting_time > 10:
+            state.step = "cancel_and_restart"
+        else:
+            state.step = "done"
+
+    elif state.step == "cancel_and_restart":
+        state.data.selected_option = None
+        state.data.booking_result = None
+        state.data.confirmation_check_done = False
+        state.step = "confirmation_check_pending"
+
+    return jsonify(asdict(state))
+    
 @app.route("/grab", methods=["POST"])
 def grab():
     try:
