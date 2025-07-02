@@ -16,7 +16,7 @@ def check_price(destination, pickup_time):
 
         if not check_login_status(d):
             print("User is not logged in. Please log in to continue.")
-            return 
+            return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
         clear_unexpected_popups(d)
 
         # proceed book

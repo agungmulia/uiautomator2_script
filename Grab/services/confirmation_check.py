@@ -16,7 +16,8 @@ def confirmation_check_handler(destination, pickup_time):
 
         # Call login checker
         if not check_login_status(d):
-            raise Exception("User is not logged in. Please log in to continue.")
+            print("User is not logged in. Please log in to continue.")
+            return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
         
         while not sess(text="Transport").exists():
             time.sleep(0.1)

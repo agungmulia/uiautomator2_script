@@ -6,6 +6,8 @@ from foodpanda.check_price import check_price as foodpanda_check_price
 from gojek.check_price import check_price as gojek_check_price
 from gojek.book_ride import book_ride as gojek_book_ride
 from gojek.cancel_ride import cancel_ride as gojek_cancel_ride
+from gojek.login import login as gojek_login
+from gojek.login import login_otp as gojek_login_otp
 from zig.check_price import check_price as zig_check_price
 from zig.cancel_ride import cancel_ride as zig_cancel_ride
 from zig.book_ride import book_ride as zig_book_ride
@@ -14,7 +16,7 @@ from tada.book_ride import book_ride as tada_book_ride
 from tada.cancel_ride import cancel_ride as tada_cancel_ride
 
 import time
-from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides
+from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info
 import time
 from dataclasses import asdict
 
@@ -209,11 +211,12 @@ def transport_flow():
     raw_data = req.get("data", {})
     print("step:", step, "raw data:", raw_data)
     data = TransportBookingData(
-        pickup_location=raw_data.get("pickup_location"),
-        destination=raw_data.get("destination"),
+        pickup_location=raw_data.get("pickup_location", ""),
+        destination=raw_data.get("destination", ""),
         time=raw_data.get("time", "now"),
         app=raw_data.get("app"),
-        payment_method=raw_data.get("payment_method"),
+        login_info=parse_login_info(raw_data.get("login_info")),
+        is_payment_default_exist=raw_data.get("is_payment_default_exist", True),
         confirmation_check_done=raw_data.get("confirmation_check_done", False),
         booking_options=parse_booking_options(raw_data.get("booking_options", [])),
         selected_option=parse_selected_option(raw_data.get("selected_option")),
@@ -224,85 +227,187 @@ def transport_flow():
     state = FlowState(flow="transport_booking", step=step, data=data)
 
     # FSM Logic
-    if state.step == "awaiting_missing_info":
+    if state.step == "start":
+        state.step = "awaiting_missing_info"
+
+    elif state.step == "awaiting_missing_info":
         if state.data.destination:
             state.step = "confirmation_check_pending"
-
+    elif state.step == "login":
+        # login action
+        if state.data.app.lower() == "gojek":
+            res = gojek_login(state.data.login_info.phone_number)
+            if res["status"] == "success":
+                print("waiting otp")
+        state.step = "login_otp_pending"
+    
+    elif state.step == "login_otp_pending":
+        if state.data.app.lower() == "gojek":
+            res = gojek_login_otp(state.data.login_info.otp)
+            if res["status"] == "success":
+                print("login success")
+        state.data.is_logged_in = True
+        state.step = "confirmation_check_pending"
     elif state.step == "confirmation_check_pending":
         booking_options = []
         
         if state.data.app is None:
             tada_result = tada_check_price(state.data.destination, state.data.time)
             if tada_result is not None:
-                for i, opt in enumerate(tada_result):
-                    booking_options.append(
-                    BookingOption(
-                        title=opt["title"],
-                        app="tada",
-                        price=opt["price"],
-                        option_id=f"{opt['title'].lower().replace(' ', '')}-tada-{i:03}"
+                if not (tada_result["status"] is not None and tada_result["status"] == "not_logged_in"):
+                    for i, opt in enumerate(tada_result):
+                        booking_options.append(
+                        BookingOption(
+                            title=opt["title"],
+                            app="tada",
+                            price=opt["price"],
+                            option_id=f"{opt['title'].lower().replace(' ', '')}-tada-{i:03}"
+                        )
                     )
-                )
                     
             ryde_result = ryde_check_price(state.data.destination, state.data.time)
             if ryde_result is not None:
-                for i, opt in enumerate(ryde_result):
-                    booking_options.append(
-                    BookingOption(
-                        title=opt["title"],
-                        app="ryde",
-                        price=opt["price"],
-                        option_id=f"{opt['title'].lower().replace(' ', '')}-ryde-{i:03}"
-                    )
-                )
-            grab_result = confirmation_check_handler(state.data.destination, state.data.time)
-            if grab_result is not None:
-                for i, opt in enumerate(grab_result):
-                    booking_options.append(
+                if not (ryde_result["status"] is not None and ryde_result["status"] == "not_logged_in"):
+                    for i, opt in enumerate(ryde_result):
+                        booking_options.append(
                         BookingOption(
                             title=opt["title"],
-                            app="grab",
+                            app="ryde",
                             price=opt["price"],
-                            option_id=f"{opt['title'].lower().replace(' ', '')}-grab-{i:03}"
+                            option_id=f"{opt['title'].lower().replace(' ', '')}-ryde-{i:03}"
                         )
                     )
+            grab_result = confirmation_check_handler(state.data.destination, state.data.time)
+            if grab_result is not None:
+                if not (grab_result["status"] is not None and grab_result["status"] == "not_logged_in"):
+                    for i, opt in enumerate(grab_result):
+                        booking_options.append(
+                            BookingOption(
+                                title=opt["title"],
+                                app="grab",
+                                price=opt["price"],
+                                option_id=f"{opt['title'].lower().replace(' ', '')}-grab-{i:03}"
+                            )
+                        )
             gojek_result = gojek_check_price(state.data.destination, state.data.time)
             if gojek_result is not None:
-                for i, opt in enumerate(gojek_result):
-                    booking_options.append(
-                    BookingOption(
-                        title=opt["title"],
-                        app="gojek",
-                        price=opt["price"],
-                        option_id=f"{opt['title'].lower().replace(' ', '')}-gojek-{i:03}"
+                if not (gojek_result["status"] is not None and gojek_result["status"] == "not_logged_in"):
+                    for i, opt in enumerate(gojek_result):
+                        booking_options.append(
+                        BookingOption(
+                            title=opt["title"],
+                            app="gojek",
+                            price=opt["price"],
+                            option_id=f"{opt['title'].lower().replace(' ', '')}-gojek-{i:03}"
+                        )
                     )
-                )
             zig_result = zig_check_price(state.data.destination, state.data.time)
             if zig_result is not None :
-                for i, opt in enumerate(zig_result):
-                    booking_options.append(
-                    BookingOption(
-                        title=opt["title"],
-                        app="zig",
-                        price=opt["price"],
-                        option_id=f"{opt['title'].lower().replace(' ', '')}-zig-{i:03}"
+                if not (zig_result["status"] is not None and zig_result["status"] == "not_logged_in"):
+                    for i, opt in enumerate(zig_result):
+                        booking_options.append(
+                        BookingOption(
+                            title=opt["title"],
+                            app="zig",
+                            price=opt["price"],
+                            option_id=f"{opt['title'].lower().replace(' ', '')}-zig-{i:03}"
+                        )
                     )
-                )
-            
+        elif (state.data.app.lower() == "grab"):
+            grab_result = confirmation_check_handler(state.data.destination, state.data.time)
+            if grab_result is not None:
+                if not (grab_result["status"] is not None and grab_result["status"] == "not_logged_in"):
+                    for i, opt in enumerate(grab_result):
+                        booking_options.append(
+                            BookingOption(
+                                title=opt["title"],
+                                app="grab",
+                                price=opt["price"],
+                                option_id=f"{opt['title'].lower().replace(' ', '')}-grab-{i:03}"
+                            )
+                        )
+                else:
+                    state.data.is_logged_in = False
+                    state.step = "login"
+                    return jsonify(asdict(state))
+
+        elif (state.data.app.lower() == "ryde"):
+            ryde_result = ryde_check_price(state.data.destination, state.data.time)
+            if ryde_result is not None:
+                if not (ryde_result["status"] is not None and ryde_result["status"] == "not_logged_in"):
+                    for i, opt in enumerate(ryde_result):
+                        booking_options.append(
+                        BookingOption(
+                            title=opt["title"],
+                            app="ryde",
+                            price=opt["price"],
+                            option_id=f"{opt['title'].lower().replace(' ', '')}-ryde-{i:03}"
+                        )
+                    )
+                else:
+                    state.data.is_logged_in = False
+                    state.step = "login"
+                    return jsonify(asdict(state))
+        elif state.data.app.lower() == "gojek":
+            gojek_result = gojek_check_price(state.data.destination, state.data.time)
+            if gojek_result is not None:
+                if not (gojek_result["status"] is not None and gojek_result["status"] == "not_logged_in"):
+                    for i, opt in enumerate(gojek_result):
+                        booking_options.append(
+                        BookingOption(
+                            title=opt["title"],
+                            app="ryde",
+                            price=opt["price"],
+                            option_id=f"{opt['title'].lower().replace(' ', '')}-ryde-{i:03}"
+                        )
+                    )
+                else:
+                    state.data.is_logged_in = False
+                    state.step = "login"
+                    return jsonify(asdict(state))
+
+        elif state.data.app.lower() == "tada":
+            tada_result = tada_check_price(state.data.destination, state.data.time)
+            if tada_result is not None:
+                if not (tada_result["status"] is not None and tada_result["status"] == "not_logged_in"):
+                    for i, opt in enumerate(tada_result):
+                        booking_options.append(
+                        BookingOption(
+                            title=opt["title"],
+                            app="ryde",
+                            price=opt["price"],
+                            option_id=f"{opt['title'].lower().replace(' ', '')}-ryde-{i:03}"
+                        )
+                    )
+                else:
+                    state.data.is_logged_in = False
+                    state.step = "login"
+                    return jsonify(asdict(state))
+        elif state.data.app.lower() == "zig":
+            zig_result = zig_check_price(state.data.destination, state.data.time)
+            if zig_result is not None:
+                if not (zig_result["status"] is not None and zig_result["status"] == "not_logged_in"):
+                    for i, opt in enumerate(zig_result):
+                        booking_options.append(
+                        BookingOption(
+                            title=opt["title"],
+                            app="ryde",
+                            price=opt["price"],
+                            option_id=f"{opt['title'].lower().replace(' ', '')}-ryde-{i:03}"
+                        )
+                    )
+                else:
+                    state.data.is_logged_in = False
+                    state.step = "login"
+                    return jsonify(asdict(state))
         state.data.booking_options = booking_options
         state.data.confirmation_check_done = True
         state.step = "awaiting_user_confirmation"
 
     elif state.step == "awaiting_user_confirmation":
         if state.data.selected_option:
-            if not state.data.payment_method:
-                state.step = "ask_payment_method"
-            else:
                 state.step = "booking_in_progress"
 
-    elif state.step == "ask_payment_method":
-        if state.data.payment_method:
-            state.step = "booking_in_progress"
 
     elif state.step == "booking_in_progress":
         res = None
@@ -316,6 +421,10 @@ def transport_flow():
             res = zig_book_ride(state.data.selected_option.title)
         elif state.data.app.lower() == "tada":
             res = tada_book_ride(state.data.selected_option.title)
+        if res["status"] == "no_payment_default":
+            state.data.is_payment_default_exist = False
+            state.step = "confirmation_check_pending"
+            return jsonify(asdict(state))
         state.data.booking_result = BookingResult(status=res["status"], waiting_time=res["waiting_time"])
         state.step = "handle_waiting_time"
 

@@ -22,6 +22,11 @@ class BookingResult:
     status: Literal["success", "failed"]
     waiting_time: int
 
+@dataclass
+class LoginInfo:
+    phone_number: str
+    otp: str
+
 
 @dataclass
 class TransportBookingData:
@@ -29,7 +34,9 @@ class TransportBookingData:
     destination: Optional[str] = None
     time: Optional[str] = "now"  # Future support
     app: Optional[str] = None  # "grab", "gojek", etc.
-    payment_method: Optional[str] = None  # "cash", "wallet", etc.
+    is_logged_in: bool = True
+    login_info: Optional[LoginInfo] = None
+    is_payment_default_exist: bool = True  # "cash", "wallet", etc.
     confirmation_check_done: bool = False
     booking_options: List[BookingOption] = field(default_factory=list)
     selected_option: Optional[SelectedOption] = None
@@ -43,9 +50,10 @@ class FlowState:
     step: Literal[
         "start",
         "awaiting_missing_info",
+        "login",
+        "login_otp_pending"
         "confirmation_check_pending",
         "awaiting_user_confirmation",
-        "ask_payment_method",
         "booking_in_progress",
         "handle_waiting_time",
         "cancel_and_restart",
@@ -62,6 +70,9 @@ def parse_selected_option(raw):
 
 def parse_booking_result(raw):
     return BookingResult(**raw) if raw else None
+
+def parse_login_info(raw):
+    return LoginInfo(**raw) if raw else None
 
 def fetch_rides(rides):
     booking_options = []
