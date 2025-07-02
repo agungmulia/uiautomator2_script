@@ -28,15 +28,7 @@ def book_ride_handler(booking_option):
                 center_x, center_y = coordinate_bounds(titleComps[i]["bounds"])
                 d.click(center_x, center_y)
                 break
-        
-        while not d(resourceId="com.grabtaxi.passenger:id/node_payment_tag_compose_view").exists():
-            time.sleep(0.1)
-        time.sleep(0.3)
-        payment_comp = d(resourceId="com.grabtaxi.passenger:id/node_payment_tag_compose_view")
-        bounds_raw = payment_comp.bounds()
-        bounds = f"[{bounds_raw[0]},{bounds_raw[1]}][{bounds_raw[2]},{bounds_raw[3]}]"
-        d.click(*coordinate_bounds(bounds))
-        
+
         # # com.grabtaxi.passenger:id/transportBookButton - book button
         d(resourceId="com.grabtaxi.passenger:id/transportBookButton").click()
         time.sleep(0.3)

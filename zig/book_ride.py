@@ -2,7 +2,7 @@ import uiautomator2 as u2
 import time
 
 from .utils import check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds
-def book_ride(ride):
+def book_ride(ride, payment_method):
     try:
         d = u2.connect()
         # sess = d.session("com.gojek.app") 
@@ -17,7 +17,7 @@ def book_ride(ride):
                 center_x, center_y = coordinate_bounds(fareDescs[i]["bounds"])
                 d.click(center_x, center_y)
                 break
-
+        
         while not d(resourceId="com.codigo.comfort:id/btnBookNow").exists():
             time.sleep(0.1)
         time.sleep(0.2)

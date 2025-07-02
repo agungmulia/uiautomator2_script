@@ -131,7 +131,7 @@ def find_components(d, text: str):
     import xml.etree.ElementTree as ET
     root = ET.fromstring(xml)
     for node in root.iter():
-        if node.attrib.get("text") is not None and node.attrib.get("text").lower() == text:  # Only include Android widgets
+        if node.attrib.get("text") is not None and text in node.attrib.get("text").lower():  # Only include Android widgets
             res_id = node.attrib.get("resource-id", "")
             text = node.attrib.get("text", "")
             return {
