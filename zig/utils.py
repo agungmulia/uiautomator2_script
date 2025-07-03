@@ -39,7 +39,7 @@ def clear_unexpected_popups(d):
             texts.append(text.lower())
         for _ in range(3):  # Multiple attempts in case of multiple layers
             
-            if any("welcome" in t.lower() for t in texts):
+            if any(any(kw in t.lower() for kw in yes_word) for t in texts):
                     for el in d.xpath("//*").all():
                         try:
                             text = el.attrib.get("text", "").strip().lower()
@@ -79,7 +79,7 @@ def accept_permissions(d):
     try:
         
         for _ in range(4):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=0.1) or d(textContains="welcome").wait(timeout=0.1) or d(textContains="Go Cashless"):
+            if d(textContains="access").wait(timeout=0.1) or d(textContains="welcome").wait(timeout=0.1) or d(textContains="Allow"):
                     for el in d.xpath("//*").all():
                         try:
                             text = el.attrib.get("text", "").strip().lower()
@@ -87,6 +87,7 @@ def accept_permissions(d):
                                 continue
 
                             for keyword in yes_word:
+                                print(f"keyword: {keyword} text: {text}")
                                 if keyword in text:
                                     print(f"[Match] Trying to click: '{text}'")
                                     el.click()
