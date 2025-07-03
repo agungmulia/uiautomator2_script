@@ -2,7 +2,7 @@
 import threading
 import time
 import uiautomator2 as u2
-from general import check_login_status, find_components_by_class_text, clear_unexpected_popups, accept_permissions, coordinate_bounds, find_components_by_id, screen_components
+from general import check_login_status, find_components, find_components_by_class_text, clear_unexpected_popups, accept_permissions, coordinate_bounds, find_components_by_id, screen_components
 
 def book_ride_handler(booking_option):
     print(f"🚖 Booking ride...")
@@ -28,7 +28,22 @@ def book_ride_handler(booking_option):
                 center_x, center_y = coordinate_bounds(titleComps[i]["bounds"])
                 d.click(center_x, center_y)
                 break
+        # check default payment
+        while not d(resourceId="com.grabtaxi.passenger:id/node_payment_tag_compose_view").exists():
+            time.sleep(0.1)
+        time.sleep(0.3)
+        payment_comp = d(resourceId="com.grabtaxi.passenger:id/node_payment_tag_compose_view")
+        bounds_raw = payment_comp.bounds()
+        bounds = f"[{bounds_raw[0]},{bounds_raw[1]}][{bounds_raw[2]},{bounds_raw[3]}]"
+        d.click(*coordinate_bounds(bounds))
 
+        while not find_components(d, "card") is not None:
+            time.sleep(0.1)
+        if not d(text="Default").exists():
+            print("No default payment method")
+            d.press("back")
+            return {"status": "no_payment_default", "message": "No payment method available"}
+        
         # # com.grabtaxi.passenger:id/transportBookButton - book button
         d(resourceId="com.grabtaxi.passenger:id/transportBookButton").click()
         time.sleep(0.3)
@@ -63,10 +78,5 @@ def book_ride_handler(booking_option):
         return str(e)
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) < 3:
-        print("Usage: python book_ride.py <destination> <pickup_time>")
-    else:
-        dest = sys.argv[1]
-        time_str = sys.argv[2]
-        book_ride_handler(dest, time_str)
+
+        book_ride_handler("dest")
