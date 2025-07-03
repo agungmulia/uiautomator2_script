@@ -62,7 +62,7 @@ def accept_permissions(d):
     """
     Try to accept permissions.
     """
-    yes_word = ["ok", "yes", "accept", "allow", "turn on"]
+    yes_word = ["ok", "yes", "accept", "allow", "turn on", "continue"]
     time.sleep(0.5)
 
     while True:
