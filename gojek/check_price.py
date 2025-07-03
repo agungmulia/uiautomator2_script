@@ -5,7 +5,7 @@ def check_price(destination, pickup_time):
     try:
         d = u2.connect()
         # sess = d.session("com.gojek.app") 
-        d.app_start("com.gojek.app", stop=False)
+        d.app_start("com.gojek.app", stop=True)
         time.sleep(2)
         accept_permissions(d)
         clear_unexpected_popups(d)

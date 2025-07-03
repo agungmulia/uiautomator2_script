@@ -48,6 +48,7 @@ def login_otp(otp):
         if d(resourceId="txtOTPInput").exists():
             d(resourceId="txtOTPInput").send_keys(otp)
         print("cek permission")
+        time.sleep(2)
         accept_permissions(d)
         print("cek popup")
         clear_unexpected_popups(d)
@@ -60,5 +61,5 @@ def login_otp(otp):
         return
     
 if __name__ == "__main__":
-    login("6580685170")
-    # login_otp("9101")
+    # login("6580685170")
+    login_otp("9101")

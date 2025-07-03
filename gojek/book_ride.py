@@ -16,6 +16,9 @@ def book_ride(ride):
                 center_x, center_y = coordinate_bounds(titleComps[i]["bounds"])
                 d.click(center_x, center_y)
                 break
+        
+        if find_components(d, "select a payment method") is not None:
+            return {"status": "no_payment_default", "message": "No payment method available"}
         # book car
         while not d(resourceId="com.gojek.app:id/tv_title").exists():
             time.sleep(0.1)

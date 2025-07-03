@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
-from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler, login as grab_login, login_otp as grab_login_otp, cancel_ride as grab_cancel_ride
+from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler, login as grab_login,  cancel_ride as grab_cancel_ride
+from Grab.services.login import login_otp as grab_login_otp
 from ryde.service.check_price import check_price as ryde_check_price
 from ryde.service.book_ride import book_ride as ryde_book_ride
 from ryde.service.cancel_ride import cancel_ride as ryde_cancel_ride
@@ -237,6 +238,7 @@ def transport_flow():
         if state.data.destination:
             state.step = "confirmation_check_pending"
     elif state.step == "login":
+        print("login step")
         # login action
         if state.data.app.lower() == "gojek":
             res = gojek_login(state.data.login_info.phone_number)
@@ -261,6 +263,7 @@ def transport_flow():
         state.step = "login_otp_pending"
     
     elif state.step == "login_otp_pending":
+        print("otp:", state.data.login_info.otp)
         if state.data.app.lower() == "gojek":
             res = gojek_login_otp(state.data.login_info.otp)
             if res["status"] == "success":
@@ -289,7 +292,7 @@ def transport_flow():
         if state.data.app is None:
             tada_result = tada_check_price(state.data.destination, state.data.time)
             if tada_result is not None:
-                if not (tada_result["status"] is not None and tada_result["status"] == "not_logged_in"):
+                if not (isinstance(tada_result, dict) and tada_result["status"] == "not_logged_in"):
                     for i, opt in enumerate(tada_result):
                         booking_options.append(
                         BookingOption(
@@ -302,7 +305,7 @@ def transport_flow():
                     
             ryde_result = ryde_check_price(state.data.destination, state.data.time)
             if ryde_result is not None:
-                if not (ryde_result["status"] is not None and ryde_result["status"] == "not_logged_in"):
+                if not (isinstance(ryde_result, dict) and ryde_result["status"] == "not_logged_in"):
                     for i, opt in enumerate(ryde_result):
                         booking_options.append(
                         BookingOption(
@@ -314,7 +317,7 @@ def transport_flow():
                     )
             grab_result = confirmation_check_handler(state.data.destination, state.data.time)
             if grab_result is not None:
-                if not (grab_result["status"] is not None and grab_result["status"] == "not_logged_in"):
+                if not (isinstance(grab_result, dict) and grab_result["status"] == "not_logged_in"):
                     for i, opt in enumerate(grab_result):
                         booking_options.append(
                             BookingOption(
@@ -326,7 +329,7 @@ def transport_flow():
                         )
             gojek_result = gojek_check_price(state.data.destination, state.data.time)
             if gojek_result is not None:
-                if not (gojek_result["status"] is not None and gojek_result["status"] == "not_logged_in"):
+                if not (isinstance(gojek_result, dict) and gojek_result["status"] == "not_logged_in"):
                     for i, opt in enumerate(gojek_result):
                         booking_options.append(
                         BookingOption(
@@ -338,7 +341,7 @@ def transport_flow():
                     )
             zig_result = zig_check_price(state.data.destination, state.data.time)
             if zig_result is not None :
-                if not (zig_result["status"] is not None and zig_result["status"] == "not_logged_in"):
+                if not (isinstance(zig_result, dict) and zig_result["status"] == "not_logged_in"):
                     for i, opt in enumerate(zig_result):
                         booking_options.append(
                         BookingOption(
@@ -351,7 +354,7 @@ def transport_flow():
         elif (state.data.app.lower() == "grab"):
             grab_result = confirmation_check_handler(state.data.destination, state.data.time)
             if grab_result is not None:
-                if not (grab_result["status"] is not None and grab_result["status"] == "not_logged_in"):
+                if not (isinstance(grab_result, dict) and grab_result["status"] == "not_logged_in"):
                     for i, opt in enumerate(grab_result):
                         booking_options.append(
                             BookingOption(
@@ -369,7 +372,7 @@ def transport_flow():
         elif (state.data.app.lower() == "ryde"):
             ryde_result = ryde_check_price(state.data.destination, state.data.time)
             if ryde_result is not None:
-                if not (ryde_result["status"] is not None and ryde_result["status"] == "not_logged_in"):
+                if not (isinstance(ryde_result, dict) and ryde_result["status"] == "not_logged_in"):
                     for i, opt in enumerate(ryde_result):
                         booking_options.append(
                         BookingOption(
@@ -386,14 +389,14 @@ def transport_flow():
         elif state.data.app.lower() == "gojek":
             gojek_result = gojek_check_price(state.data.destination, state.data.time)
             if gojek_result is not None:
-                if not (gojek_result["status"] is not None and gojek_result["status"] == "not_logged_in"):
+                if not (isinstance(gojek_result, dict) and gojek_result["status"] == "not_logged_in"):
                     for i, opt in enumerate(gojek_result):
                         booking_options.append(
                         BookingOption(
                             title=opt["title"],
-                            app="ryde",
+                            app="gojek",
                             price=opt["price"],
-                            option_id=f"{opt['title'].lower().replace(' ', '')}-ryde-{i:03}"
+                            option_id=f"{opt['title'].lower().replace(' ', '')}-gojek-{i:03}"
                         )
                     )
                 else:
@@ -404,14 +407,14 @@ def transport_flow():
         elif state.data.app.lower() == "tada":
             tada_result = tada_check_price(state.data.destination, state.data.time)
             if tada_result is not None:
-                if not (tada_result["status"] is not None and tada_result["status"] == "not_logged_in"):
+                if not (isinstance(tada_result, dict) and tada_result["status"] == "not_logged_in"):
                     for i, opt in enumerate(tada_result):
                         booking_options.append(
                         BookingOption(
                             title=opt["title"],
-                            app="ryde",
+                            app="tada",
                             price=opt["price"],
-                            option_id=f"{opt['title'].lower().replace(' ', '')}-ryde-{i:03}"
+                            option_id=f"{opt['title'].lower().replace(' ', '')}-tada-{i:03}"
                         )
                     )
                 else:
@@ -421,14 +424,14 @@ def transport_flow():
         elif state.data.app.lower() == "zig":
             zig_result = zig_check_price(state.data.destination, state.data.time)
             if zig_result is not None:
-                if not (zig_result["status"] is not None and zig_result["status"] == "not_logged_in"):
+                if not (isinstance(zig_result, dict) and zig_result["status"] == "not_logged_in"):
                     for i, opt in enumerate(zig_result):
                         booking_options.append(
                         BookingOption(
                             title=opt["title"],
-                            app="ryde",
+                            app="zig",
                             price=opt["price"],
-                            option_id=f"{opt['title'].lower().replace(' ', '')}-ryde-{i:03}"
+                            option_id=f"{opt['title'].lower().replace(' ', '')}-zig-{i:03}"
                         )
                     )
                 else:
