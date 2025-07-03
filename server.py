@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify
-from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler
+from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler, login as grab_login, login_otp as grab_login_otp, cancel_ride as grab_cancel_ride
 from ryde.service.check_price import check_price as ryde_check_price
 from ryde.service.book_ride import book_ride as ryde_book_ride
+from ryde.service.cancel_ride import cancel_ride as ryde_cancel_ride
+from ryde.service.login import login as ryde_login, login_otp as ryde_login_otp
 from foodpanda.check_price import check_price as foodpanda_check_price
 from gojek.check_price import check_price as gojek_check_price
 from gojek.book_ride import book_ride as gojek_book_ride
@@ -11,6 +13,7 @@ from gojek.login import login_otp as gojek_login_otp
 from zig.check_price import check_price as zig_check_price
 from zig.cancel_ride import cancel_ride as zig_cancel_ride
 from zig.book_ride import book_ride as zig_book_ride
+from zig.login import login as zig_login, login_otp as zig_login_otp
 from tada.check_price import check_price as tada_check_price
 from tada.book_ride import book_ride as tada_book_ride
 from tada.cancel_ride import cancel_ride as tada_cancel_ride
@@ -239,11 +242,43 @@ def transport_flow():
             res = gojek_login(state.data.login_info.phone_number)
             if res["status"] == "success":
                 print("waiting otp")
+        elif state.data.app.lower() == "grab":
+            res = grab_login(state.data.login_info.phone_number)
+            if res["status"] == "success":
+                print("waiting otp")
+        # elif state.data.app.lower() == "tada":
+        #     res = tada_login(state.data.login_info.phone_number)
+        #     if res["status"] == "success":
+        #         print("waiting otp")
+        elif state.data.app.lower() == "ryde":
+            res = ryde_login(state.data.login_info.phone_number)
+            if res["status"] == "success":
+                print("waiting otp")
+        elif state.data.app.lower() == "zig":
+            res = zig_login(state.data.login_info.phone_number)
+            if res["status"] == "success":
+                print("waiting otp")
         state.step = "login_otp_pending"
     
     elif state.step == "login_otp_pending":
         if state.data.app.lower() == "gojek":
             res = gojek_login_otp(state.data.login_info.otp)
+            if res["status"] == "success":
+                print("login success")
+        elif state.data.app.lower() == "grab":
+            res = grab_login_otp(state.data.login_info.otp)
+            if res["status"] == "success":
+                print("login success")
+        # elif state.data.app.lower() == "tada":
+        #     res = tada_login_otp(state.data.login_info.otp)
+        #     if res["status"] == "success":
+        #         print("login success")
+        elif state.data.app.lower() == "ryde":
+            res = ryde_login_otp(state.data.login_info.otp)
+            if res["status"] == "success":
+                print("login success")
+        elif state.data.app.lower() == "zig":
+            res = zig_login_otp(state.data.login_info.otp)
             if res["status"] == "success":
                 print("login success")
         state.data.is_logged_in = True
@@ -435,6 +470,16 @@ def transport_flow():
             state.step = "done"
 
     elif state.step == "cancel_and_restart":
+        if state.data.app.lower() == "grab":
+            grab_cancel_ride()
+        elif state.data.app.lower() == "ryde":
+            ryde_cancel_ride()
+        elif state.data.app.lower() == "gojek":
+            gojek_cancel_ride()
+        elif state.data.app.lower() == "tada":
+            tada_cancel_ride()
+        elif state.data.app.lower() == "zig":
+            zig_cancel_ride()
         state.data.selected_option = None
         state.data.booking_result = None
         state.data.confirmation_check_done = False
