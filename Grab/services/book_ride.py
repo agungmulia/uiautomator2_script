@@ -43,7 +43,8 @@ def book_ride_handler(booking_option):
             print("No default payment method")
             d.press("back")
             return {"status": "no_payment_default", "message": "No payment method available"}
-        
+        else:
+            d.press("back")
         # # com.grabtaxi.passenger:id/transportBookButton - book button
         d(resourceId="com.grabtaxi.passenger:id/transportBookButton").click()
         time.sleep(0.3)
