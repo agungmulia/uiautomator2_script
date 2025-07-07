@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 import time
 from .utils import check_login_status, clear_unexpected_popups, accept_permissions, find_components_by_class_text, screen_components, find_components, find_components_by_id, coordinate_bounds
 from general import cache_get, cache_set
-def check_price(restaurant, dropoff, orders, pcs=1, pref="", note= ""):
+def check_price(restaurant, dropoff, orders, note= ""):
     try:
         d = u2.connect()
         # d.app_start("com.global.foodpanda.android", stop=False)
@@ -13,7 +13,7 @@ def check_price(restaurant, dropoff, orders, pcs=1, pref="", note= ""):
         # clear_unexpected_popups(d)
         # Call login checker
         if not check_login_status(d):
-            raise Exception("User is not logged in. Please log in to continue.")
+            return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
         
         while not d(resourceId="HomeSearchBar").exists():
             time.sleep(0.1)
@@ -42,11 +42,11 @@ def check_price(restaurant, dropoff, orders, pcs=1, pref="", note= ""):
             d(resourceId="search_bar").click()
 
             while not d(resourceId="com.global.foodpanda.android:id/searchEditText").exists():
-                time.sleep(0.1)
+                time.sleep(0.2)
             d(resourceId="com.global.foodpanda.android:id/searchEditText").send_keys(order["name"])
 
             while not d(resourceId="com.global.foodpanda.android:id/titleTextView").exists():
-                time.sleep(0.1)
+                time.sleep(0.2)
             # # d.hide_keyboard()
             d(resourceId="com.global.foodpanda.android:id/dishTileLayout").click()
             # # we can display the list then ask user
@@ -73,12 +73,13 @@ def check_price(restaurant, dropoff, orders, pcs=1, pref="", note= ""):
                     d.press("back")
                 else:
                     while not d(resourceId="com.global.foodpanda.android:id/primaryActionButton").exists():
-                        time.sleep(0.1)
+                        time.sleep(0.2)
                     d(resourceId="com.global.foodpanda.android:id/primaryActionButton").click()
                     while not d(resourceId="DhBreakdownCtaButton").exists():
                         time.sleep(0.1)
                     d(resourceId="DhBreakdownCtaButton").click()
-                    get_order_detail(d)
+                    res = get_order_detail(d)
+                    return {"status": "success","price": res["total_price"], "orders": res["orders"], "app": "foodpanda"}
 
                     
             else:
@@ -101,8 +102,6 @@ def check_price(restaurant, dropoff, orders, pcs=1, pref="", note= ""):
             "restaurant": restaurant,
             "dropoff": dropoff,
             "orders": orders,
-            "pcs": pcs,
-            "pref": pref,
             "note": note
         })
         return result

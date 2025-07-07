@@ -86,3 +86,75 @@ def fetch_rides(rides):
             )
         )
     return booking_options
+
+@dataclass
+class LoginInfo:
+    phone_number: str = ""
+    otp: str = ""
+
+@dataclass
+class FoodItem:
+    name: str
+    quantity: int = 1
+    customization: str = ""
+
+@dataclass
+class MenuOption:
+    app: str
+    price: float
+    option_id: str
+    orders: List[FoodItem] = field(default_factory=list)
+
+@dataclass
+class SelectedOption:
+    title: str = ""
+    app: str = ""
+    option_id: str = ""
+
+@dataclass
+class OrderResult:
+    status: str = ""
+    estimated_delivery_time: int = 0
+
+@dataclass
+class FoodOrderData:
+    delivery_location: str = ""
+    delivery_note: str = ""
+    restaurant_name: str = ""
+    food_items: List[FoodItem] = field(default_factory=list)
+    app: Optional[str] = None
+    is_logged_in: bool = True
+    login_info: LoginInfo = field(default_factory=LoginInfo)
+    is_payment_default_exist: bool = True
+    confirmation_check_done: bool = False
+    menu_options: List[MenuOption] = field(default_factory=list)
+    selected_option: SelectedOption = field(default_factory=SelectedOption)
+    order_result: OrderResult = field(default_factory=OrderResult)
+    cancelled: bool = False
+
+@dataclass
+class FlowState:
+    flow: str
+    step: str
+    data: FoodOrderData
+
+# Parsers
+
+def parse_login_info(info) -> LoginInfo:
+    info = info or {}  # Ensure it's a dict
+    return LoginInfo(
+        phone_number=info.get("phone_number", ""),
+        otp=info.get("otp", ""),
+    )
+
+def parse_food_items(items) -> List[FoodItem]:
+    return [FoodItem(**item) for item in items if "name" in item]
+
+def parse_menu_options(options) -> List[MenuOption]:
+    return [MenuOption(**opt) for opt in options if "title" in opt]
+
+def parse_selected_option(opt) -> SelectedOption:
+    return SelectedOption(**opt) if opt else SelectedOption()
+
+def parse_order_result(result) -> OrderResult:
+    return OrderResult(**result) if result else OrderResult()

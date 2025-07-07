@@ -5,41 +5,44 @@ import xml.etree.ElementTree as ET
 import traceback
 from general import find_components, coordinate_bounds, cache_get, cache_set, find_components_by_id, accept_permissions, clear_unexpected_popups, check_login_status
 
-def check_order(restaurant, dropoff, orders, pcs=1, pref="", note= ""):
+def check_order_food(restaurant, dropoff, orders, note=""):
     try:
         d = u2.connect()
-        d.app_start("com.grabtaxi.passenger") 
+        d.app_start("com.grabtaxi.passenger", stop=True) 
         threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
         threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
 
 
         # Call login checker
         if not check_login_status(d):
-            raise Exception("User is not logged in. Please log in to continue.")
+            return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
         
         while not d(text="Food").exists():
-            time.sleep(0.1)
+            time.sleep(0.2)
         d(text="Food").click()
 
         while not d(text="What shall we deliver?").exists():
-            time.sleep(0.1)
+            time.sleep(0.2)
         d(text="What shall we deliver?").click()
         while not d(resourceId="com.grabtaxi.passenger:id/gds_appbar_search_field").exists():
-                time.sleep(0.1)
+                time.sleep(0.2)
         print(d(text="Would you like to eat something?").exists())
         time.sleep(0.5)
         d(className="android.widget.EditText").send_keys(restaurant)
         # pick 1st element
         while not d(className="android.view.View")[14].exists():
-            time.sleep(0.1)
+            time.sleep(0.2)
             print("wait for search result")
             # com.grabtaxi.passenger:id/deliveries_search_autocomplete
         print("click search result")
         d(className="android.view.View")[14].click()
         while not d(resourceId="com.grabtaxi.passenger:id/universal_merchant_card_compose_view").exists():
-                time.sleep(0.1)
+                time.sleep(0.2)
         # avoid ads
-        d(resourceId="com.grabtaxi.passenger:id/universal_merchant_card_compose_view")[1].click()
+        if find_components(d, "ads") is None:
+            d(resourceId="com.grabtaxi.passenger:id/universal_merchant_card_compose_view")[0].click()
+        else:
+            d(resourceId="com.grabtaxi.passenger:id/universal_merchant_card_compose_view")[1].click()
         time.sleep(0.5)
         specials = []
         for idx, order in enumerate(orders):
@@ -53,11 +56,11 @@ def check_order(restaurant, dropoff, orders, pcs=1, pref="", note= ""):
                 d.click(*coordinate_bounds(search_btn["bounds"]))
 
             while not d(className="android.widget.EditText").exists():
-                time.sleep(0.1)
+                time.sleep(0.2)
             d(className="android.widget.EditText").send_keys(order["name"])
 
             while not d(resourceId="com.grabtaxi.passenger:id/recycler_view").exists():
-                time.sleep(0.1)
+                time.sleep(0.2)
             # pick 1st element
             recycler = d(resourceId="com.grabtaxi.passenger:id/recycler_view")
 
@@ -84,11 +87,11 @@ def check_order(restaurant, dropoff, orders, pcs=1, pref="", note= ""):
                 print("confirm button")
                 # press confirm button
                 while not find_components_by_id(d, "com.grabtaxi.passenger:id/gds_button_content_layout")[0]:
-                    time.sleep(0.1)
+                    time.sleep(0.2)
                 time.sleep(0.2)
 
                 while not find_components_by_id(d, "com.grabtaxi.passenger:id/gds_button_content_layout")[0]:
-                    time.sleep(0.1)
+                    time.sleep(0.2)
                     print("wait for confirm button")
                 cfm_comp = find_components_by_id(d, "com.grabtaxi.passenger:id/gds_button_content_layout")[0]
                 if cfm_comp is not None:
@@ -100,18 +103,20 @@ def check_order(restaurant, dropoff, orders, pcs=1, pref="", note= ""):
             
                     # check out
                     while not find_components_by_id(d, "com.grabtaxi.passenger:id/search_bottom_place_holder"):
-                        time.sleep(0.1)
+                        time.sleep(0.2)
                         print("wait for checkout")
                     checkout_comp = find_components_by_id(d, "com.grabtaxi.passenger:id/search_bottom_place_holder")[0]
                     if checkout_comp is not None:
                         d.click(*coordinate_bounds(checkout_comp["bounds"]))
                     
                     while not d(resourceId="com.grabtaxi.passenger:id/gf_checkout_total").exists():
-                        time.sleep(0.1)
+                        time.sleep(0.2)
                     price = d(resourceId="com.grabtaxi.passenger:id/gf_checkout_total").get_text()
                     print(price)
                     return {
-                        "price": price
+                        "status": "success",
+                        "price": price,
+                        "app": "grab"
                     }
             else :
                 # Parse dump
@@ -126,8 +131,6 @@ def check_order(restaurant, dropoff, orders, pcs=1, pref="", note= ""):
                     "restaurant": restaurant,
                     "dropoff": dropoff,
                     "orders": orders,
-                    "pcs": pcs,
-                    "pref": pref,
                     "note": note
                 })
         return specials
@@ -151,11 +154,11 @@ def confirm_order(specials):
                 d.click(*coordinate_bounds(search_btn["bounds"]))
 
             while not d(className="android.widget.EditText").exists():
-                time.sleep(0.1)
+                time.sleep(0.2)
             d(className="android.widget.EditText").send_keys(order["name"])
 
             while not d(resourceId="com.grabtaxi.passenger:id/recycler_view").exists():
-                time.sleep(0.1)
+                time.sleep(0.2)
             # pick 1st element
             recycler = d(resourceId="com.grabtaxi.passenger:id/recycler_view")
 
@@ -185,10 +188,10 @@ def confirm_order(specials):
             print("confirm button")
             # press confirm button
             while not find_components_by_id(d, "com.grabtaxi.passenger:id/gds_button_content_layout")[0]:
-                time.sleep(0.1)
+                time.sleep(0.2)
             time.sleep(0.2)
             while not find_components_by_id(d, "com.grabtaxi.passenger:id/gds_button_content_layout")[0]:
-                time.sleep(0.1)
+                time.sleep(0.2)
                 print("wait for confirm button")
             cfm_comp = find_components_by_id(d, "com.grabtaxi.passenger:id/gds_button_content_layout")[0]
             if cfm_comp is not None:
@@ -200,14 +203,14 @@ def confirm_order(specials):
         
                 # check out
                 while not find_components_by_id(d, "com.grabtaxi.passenger:id/search_bottom_place_holder"):
-                    time.sleep(0.1)
+                    time.sleep(0.2)
                     print("wait for checkout")
                 checkout_comp = find_components_by_id(d, "com.grabtaxi.passenger:id/search_bottom_place_holder")[0]
                 if checkout_comp is not None:
                     d.click(*coordinate_bounds(checkout_comp["bounds"]))
                 
                 while not d(resourceId="com.grabtaxi.passenger:id/gf_checkout_total").exists():
-                    time.sleep(0.1)
+                    time.sleep(0.2)
                 price = d(resourceId="com.grabtaxi.passenger:id/gf_checkout_total").get_text()
                 print(price)
                 return {
@@ -269,7 +272,7 @@ if __name__ == "__main__":
     }
     ]
     
-    check_order(restaurant, dropoff, orders)
+    # check_order(restaurant, dropoff, orders)
     # special_reqs = [[ "remove pineapple", "remove black pepper mayo" ]]
     special_reqs = [[ "remove pineapple", "remove black pepper mayo" ], ["remove bigmac sauce", "remove onion"]]
     confirm_order(special_reqs)

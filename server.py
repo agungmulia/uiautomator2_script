@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler, login as grab_login,  cancel_ride as grab_cancel_ride
 from Grab.services.login import login_otp as grab_login_otp
+from Grab.services.food import check_order_food as grab_check_order_food
 from ryde.service.check_price import check_price as ryde_check_price
 from ryde.service.book_ride import book_ride as ryde_book_ride
 from ryde.service.cancel_ride import cancel_ride as ryde_cancel_ride
@@ -20,7 +21,7 @@ from tada.book_ride import book_ride as tada_book_ride
 from tada.cancel_ride import cancel_ride as tada_cancel_ride
 
 import time
-from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info
+from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info, FoodOrderData, parse_food_items, parse_order_result, parse_menu_options, MenuOption, OrderResult
 import time
 from dataclasses import asdict
 
@@ -488,6 +489,127 @@ def transport_flow():
         state.data.confirmation_check_done = False
         state.step = "confirmation_check_pending"
 
+    return jsonify(asdict(state))
+
+@app.route("/food/flow", methods=["POST"])
+def food_flow():
+    req = request.get_json()
+
+    flow = req.get("flow")
+    step = req.get("step")
+    raw_data = req.get("data", {})
+    print("step:", step, "raw data:", raw_data)
+
+    data = FoodOrderData(
+        delivery_location=raw_data.get("delivery_location", ""),
+        restaurant_name=raw_data.get("restaurant_name", ""),
+        food_items=parse_food_items(raw_data.get("food_items", [])),
+        app=raw_data.get("app"),
+        login_info=parse_login_info(raw_data.get("login_info")),
+        is_payment_default_exist=raw_data.get("is_payment_default_exist", True),
+        confirmation_check_done=raw_data.get("confirmation_check_done", False),
+        menu_options=parse_menu_options(raw_data.get("menu_options", [])),
+        selected_option=parse_selected_option(raw_data.get("selected_option")),
+        order_result=parse_order_result(raw_data.get("order_result")),
+        cancelled=raw_data.get("cancelled", False)
+    )
+
+    state = FlowState(flow="food_ordering", step=step, data=data)
+
+    if state.step == "start":
+        state.step = "awaiting_missing_info"
+
+    elif state.step == "awaiting_missing_info":
+        print("state.data.delivery_location:", state.data.delivery_location, "state.data.restaurant_name:", state.data.restaurant_name, "state.data.food_items:", state.data.food_items)
+        if state.data.delivery_location and state.data.restaurant_name and state.data.food_items:
+            state.step = "confirmation_check_pending"
+
+    elif state.step == "login":
+        # res = login_to_app(state.data.app, state.data.login_info.phone_number)
+        res = {"status": "success"}
+        if res["status"] == "success":
+            state.step = "login_otp_pending"
+
+    elif state.step == "login_otp_pending":
+        # res = verify_otp(state.data.app, state.data.login_info.otp)
+        res = {"status": "success"}
+        if res["status"] == "success":
+            state.data.is_logged_in = True
+            state.step = "confirmation_check_pending"
+
+    elif state.step == "confirmation_check_pending":
+        # options = get_menu_options(
+        #     app=state.data.app,
+        #     restaurant=state.data.restaurant_name,
+        #     food_items=state.data.food_items
+        # )
+        options = []
+
+        orders = [
+            {
+                "name": order.name,
+                "pcs": order.quantity,
+                "pref": "regular",
+            }
+            for order in state.data.food_items
+        ]
+        print("orders:", orders)
+        if state.data.app is None:
+            grab_res = grab_check_order_food(state.data.restaurant_name, state.data.delivery_location, orders, state.data.delivery_note)
+            if grab_res is not None:
+                if not (isinstance(grab_res, dict) and grab_res["status"] == "not_logged_in"):
+                    options.append(grab_res)
+
+            foodpanda_res = foodpanda_check_price(state.data.restaurant_name, state.data.delivery_location, orders, state.data.delivery_note)
+            if foodpanda_res is not None:
+                print("cek logic", not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"))
+                if not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"):
+                    print("response:", foodpanda_res)
+                    options.append(foodpanda_res)
+        print("options:", options)
+        if isinstance(options, list):
+            state.data.menu_options = [
+                MenuOption(
+                    app=opt["app"],
+                    price=opt["price"],
+                    option_id=f"{opt["app"]}-{i:03}",
+                    orders=state.data.food_items
+                )
+                for i, opt in enumerate(options)
+            ]
+            state.data.confirmation_check_done = True
+            state.step = "awaiting_user_confirmation"
+        elif options.get("status") == "not_logged_in":
+            state.data.is_logged_in = False
+            state.step = "login"
+            return jsonify(asdict(state))
+
+    elif state.step == "awaiting_user_confirmation":
+        if state.data.selected_option:
+            state.step = "ordering_in_progress"
+
+    elif state.step == "ordering_in_progress":
+        # res = place_order(state.data.app, state.data.selected_option.title)
+        # if res["status"] == "no_payment_default":
+        #     state.data.is_payment_default_exist = False
+        #     state.step = "confirmation_check_pending"
+        #     return jsonify(asdict(state))
+        res = {"status": "success", "estimated_delivery_time": 20}
+        state.data.order_result = OrderResult(status=res["status"], estimated_delivery_time=res["estimated_delivery_time"])
+        state.step = "handle_estimated_time"
+
+    elif state.step == "handle_estimated_time":
+        
+            state.step = "done"
+
+    elif state.step == "cancel_and_restart":
+        # cancel_order(state.data.app)
+        state.data.selected_option = None
+        state.data.order_result = None
+        state.data.confirmation_check_done = False
+        state.step = "confirmation_check_pending"
+
+    print("sent state: ", state)
     return jsonify(asdict(state))
 
 
