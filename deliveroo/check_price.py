@@ -205,6 +205,7 @@ def checkout():
             print("no address")
             return {"status": "no_address_default", "message": "No address available"}
         press_by_text(d, "Place delivery order")
+        return {"status": "success", "waiting_time": ""}
     except Exception as e:
         # d = u2.connect()
         # sess = d.session("org.telegram.messenger") 

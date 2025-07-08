@@ -8,38 +8,38 @@ from general import find_components, coordinate_bounds, cache_get, cache_set, fi
 def check_order_food(restaurant, dropoff, orders, note=""):
     try:
         d = u2.connect()
-        d.app_start("com.grabtaxi.passenger", stop=True) 
-        threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
-        threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
+        d.app_start("com.grabtaxi.passenger", stop=False) 
+        # threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
+        # threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
 
 
-        # Call login checker
-        if not check_login_status(d):
-            return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
+        # # Call login checker
+        # if not check_login_status(d):
+        #     return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
         
-        while not d(text="Food").exists():
-            time.sleep(0.2)
-        d(text="Food").click()
+        # while not d(text="Food").exists():
+        #     time.sleep(0.2)
+        # d(text="Food").click()
 
-        while not d(text="What shall we deliver?").exists():
-            time.sleep(0.2)
-        d(text="What shall we deliver?").click()
-        while not d(resourceId="com.grabtaxi.passenger:id/gds_appbar_search_field").exists():
-                time.sleep(0.2)
-        print(d(text="Would you like to eat something?").exists())
-        time.sleep(0.5)
-        d(className="android.widget.EditText").send_keys(restaurant)
-        # pick 1st element
-        while not d(className="android.view.View")[14].exists():
-            time.sleep(0.2)
-            print("wait for search result")
-            # com.grabtaxi.passenger:id/deliveries_search_autocomplete
-        print("click search result")
-        d(className="android.view.View")[14].click()
+        # while not d(text="What shall we deliver?").exists():
+        #     time.sleep(0.2)
+        # d(text="What shall we deliver?").click()
+        # while not d(resourceId="com.grabtaxi.passenger:id/gds_appbar_search_field").exists():
+        #         time.sleep(0.2)
+        # print(d(text="Would you like to eat something?").exists())
+        # time.sleep(0.5)
+        # d(className="android.widget.EditText").send_keys(restaurant)
+        # # pick 1st element
+        # while not d(className="android.view.View")[14].exists():
+        #     time.sleep(0.2)
+        #     print("wait for search result")
+        #     # com.grabtaxi.passenger:id/deliveries_search_autocomplete
+        # print("click search result")
+        # d(className="android.view.View")[14].click()
         while not d(resourceId="com.grabtaxi.passenger:id/universal_merchant_card_compose_view").exists():
                 time.sleep(0.2)
         # avoid ads
-        if find_components(d, "ads") is None:
+        if not d(text="Ad").exists():
             d(resourceId="com.grabtaxi.passenger:id/universal_merchant_card_compose_view")[0].click()
         else:
             d(resourceId="com.grabtaxi.passenger:id/universal_merchant_card_compose_view")[1].click()
@@ -111,6 +111,33 @@ def check_order_food(restaurant, dropoff, orders, note=""):
                     
                     while not d(resourceId="com.grabtaxi.passenger:id/gf_checkout_total").exists():
                         time.sleep(0.2)
+                    # check voucher
+                    d(scrollable=True).scroll.toEnd()
+                    time.sleep(0.4)
+                    while not d(description="CODE_OFFER_MESSAGE").exists():
+                        time.sleep(0.2)
+                    el = d(description="CODE_OFFER_MESSAGE")[0]
+                    bounds_raw = el.bounds()
+                    bounds = f"[{bounds_raw[0]},{bounds_raw[1]}][{bounds_raw[2]},{bounds_raw[3]}]"
+                    d.click(*coordinate_bounds(bounds))
+
+                    while not d(resourceId="com.grabtaxi.passenger:id/promo_code_edittext").exists():
+                        time.sleep(0.2)
+                    el = d(resourceId="com.grabtaxi.passenger:id/compose_view")[1]
+                    bounds_raw = el.bounds()
+                    bounds = f"[{bounds_raw[0]},{bounds_raw[1]}][{bounds_raw[2]},{bounds_raw[3]}]"
+                    d.click(*coordinate_bounds(bounds))
+
+                    while not d(resourceId="com.grabtaxi.passenger:id/btn_offer_details").exists():
+                        time.sleep(0.2)
+                    if d(text="Unavailable").exists():
+                        d.press("back")
+                        d.press("back")
+                    else:
+                        d(resourceId="com.grabtaxi.passenger:id/btn_offer_details").click()
+                    time.sleep(0.8)
+                    # end voucher flow
+                    
                     price = d(resourceId="com.grabtaxi.passenger:id/gf_checkout_total").get_text()
                     print(price)
                     return {
@@ -211,6 +238,33 @@ def confirm_order(specials):
                 
                 while not d(resourceId="com.grabtaxi.passenger:id/gf_checkout_total").exists():
                     time.sleep(0.2)
+                # check voucher
+                d(scrollable=True).scroll.toEnd()
+                time.sleep(0.4)
+                while not d(description="CODE_OFFER_MESSAGE").exists():
+                    time.sleep(0.2)
+                el = d(description="CODE_OFFER_MESSAGE")[0]
+                bounds_raw = el.bounds()
+                bounds = f"[{bounds_raw[0]},{bounds_raw[1]}][{bounds_raw[2]},{bounds_raw[3]}]"
+                d.click(*coordinate_bounds(bounds))
+
+                while not d(resourceId="com.grabtaxi.passenger:id/promo_code_edittext").exists():
+                    time.sleep(0.2)
+                el = d(resourceId="com.grabtaxi.passenger:id/compose_view")[1]
+                bounds_raw = el.bounds()
+                bounds = f"[{bounds_raw[0]},{bounds_raw[1]}][{bounds_raw[2]},{bounds_raw[3]}]"
+                d.click(*coordinate_bounds(bounds))
+
+                while not d(resourceId="com.grabtaxi.passenger:id/btn_offer_details").exists():
+                    time.sleep(0.2)
+                if d(text="Unavailable").exists():
+                    d.press("back")
+                    d.press("back")
+                else:
+                    d(resourceId="com.grabtaxi.passenger:id/btn_offer_details").click()
+                time.sleep(0.8)
+                # end voucher flow
+                
                 price = d(resourceId="com.grabtaxi.passenger:id/gf_checkout_total").get_text()
                 print(price)
                 return {
@@ -260,19 +314,19 @@ if __name__ == "__main__":
         "name": "buttermilk",
         "is_general_name": True,
         "pcs": 2,
-        "pref": "regulars",
+        "pref": "regular",
         "note": "No special request"
     }, 
     {
         "name": "big ma",
         "is_general_name": True,
         "pcs": 2,
-        "pref": "regulars",
+        "pref": "regular",
         "note": "No special request"
     }
     ]
     
-    # check_order(restaurant, dropoff, orders)
+    check_order_food(restaurant, dropoff, orders)
     # special_reqs = [[ "remove pineapple", "remove black pepper mayo" ]]
-    special_reqs = [[ "remove pineapple", "remove black pepper mayo" ], ["remove bigmac sauce", "remove onion"]]
-    confirm_order(special_reqs)
+    # special_reqs = [[ "remove pineapple", "remove black pepper mayo" ], ["remove bigmac sauce", "remove onion"]]
+    # confirm_order(special_reqs)

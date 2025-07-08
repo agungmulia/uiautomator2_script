@@ -6,18 +6,22 @@ from general import cache_get, cache_set
 def check_price(restaurant, dropoff, orders, note= ""):
     try:
         d = u2.connect()
-        # d.app_start("com.global.foodpanda.android", stop=False)
-        d.app_start("com.global.foodpanda.android", stop=True)
-        time.sleep(2)
+        d.app_start("com.global.foodpanda.android", stop=False)
+        # d.app_start("com.global.foodpanda.android", stop=True)
+        # time.sleep(2)
         # accept_permissions(d)
         # clear_unexpected_popups(d)
         # Call login checker
-        if not check_login_status(d):
-            return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
+        # if not check_login_status(d):
+        #     return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
         
         while not d(resourceId="HomeSearchBar").exists():
-            time.sleep(0.1)
-        d(resourceId="HomeSearchBar").click()
+            time.sleep(0.5)
+        print("klik search")
+        search_bar = d(resourceId="HomeSearchBar")
+        bounds_raw = search_bar.bounds()
+        bounds = f"[{bounds_raw[0]},{bounds_raw[1]}][{bounds_raw[2]},{bounds_raw[3]}]"
+        d.click(*coordinate_bounds(bounds))
 
         search = d(className="android.widget.EditText")[0]
         search.send_keys(restaurant)
@@ -239,6 +243,19 @@ def get_order_detail(d):
         if swipe_end_comp is not None:
             break
         d.swipe(0.5, 0.57, 0.5, 0.5, duration=0.05)
+    # check voucher
+    d(resourceId="com.global.foodpanda.android:id/applyVoucherTextView").click()
+    time.sleep(0.9)
+    el = d(description="Apply")[1]
+    bounds_raw = el.bounds()
+    bounds = f"[{bounds_raw[0]},{bounds_raw[1]}][{bounds_raw[2]},{bounds_raw[3]}]"
+    d.click(*coordinate_bounds(bounds))
+    time.sleep(2)
+    if not d(resourceId="com.global.foodpanda.android:id/productItemNameTextView").exists():
+        d.press("back")
+        d.press("back")
+    time.sleep(0.8)
+
     order_name_comps = find_components_by_id(d, "com.global.foodpanda.android:id/productItemNameTextView")
     order_price_comps = find_components_by_id(d, "com.global.foodpanda.android:id/productItemPriceTextView")
     orders = []
@@ -269,14 +286,14 @@ if __name__ == "__main__":
         "name": "buttermilk",
         "is_general_name": True,
         "pcs": 2,
-        "pref": "regulars",
+        "pref": "regular",
         "note": "No special request"
     }, 
     {
         "name": "big ma",
         "is_general_name": True,
         "pcs": 2,
-        "pref": "regulars",
+        "pref": "regular",
         "note": "No special request"
     }
     ]
@@ -284,4 +301,4 @@ if __name__ == "__main__":
     check_price(restaurant, dropoff, orders)
     special_reqs = [[ "no pineapple", "no black pepper mayo" ], ["no bigmac sauce", "no onion"]]
     # special_reqs = [[ "no cheese" ], ["no cheese", "no curry sauce"]]
-    confirm_order(special_requests=special_reqs)
+    # confirm_order(special_requests=special_reqs)
