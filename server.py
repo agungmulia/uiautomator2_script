@@ -1,12 +1,13 @@
 from flask import Flask, request, jsonify
 from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler, login as grab_login,  cancel_ride as grab_cancel_ride
 from Grab.services.login import login_otp as grab_login_otp
-from Grab.services.food import check_order_food as grab_check_order_food
+from Grab.services.food import check_order_food as grab_check_order_food, checkout as grab_checkout
 from ryde.service.check_price import check_price as ryde_check_price
 from ryde.service.book_ride import book_ride as ryde_book_ride
 from ryde.service.cancel_ride import cancel_ride as ryde_cancel_ride
 from ryde.service.login import login as ryde_login, login_otp as ryde_login_otp
 from foodpanda.check_price import check_price as foodpanda_check_price
+from deliveroo.check_price import check_price as deliveroo_check_price
 from gojek.check_price import check_price as gojek_check_price
 from gojek.book_ride import book_ride as gojek_book_ride
 from gojek.cancel_ride import cancel_ride as gojek_cancel_ride
@@ -556,30 +557,35 @@ def food_flow():
         ]
         print("orders:", orders)
         if state.data.app is None:
-            # grab_res = grab_check_order_food(state.data.restaurant_name, state.data.delivery_location, orders, state.data.delivery_note)
-            # if grab_res is not None:
-            #     if not (isinstance(grab_res, dict) and grab_res["status"] == "not_logged_in"):
-            #         options.append(grab_res)
+            grab_res = grab_check_order_food(state.data.restaurant_name, state.data.delivery_location, orders, state.data.delivery_note)
+            if grab_res is not None:
+                if not (isinstance(grab_res, dict) and grab_res["status"] == "not_logged_in"):
+                    options.append(grab_res)
 
-            # foodpanda_res = foodpanda_check_price(state.data.restaurant_name, state.data.delivery_location, orders, state.data.delivery_note)
-            # if foodpanda_res is not None:
-            #     print("cek logic", not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"))
-            #     if not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"):
-            #         print("response:", foodpanda_res)
-            #         options.append(foodpanda_res)
-            options = [
-                {
-                    "app": "grab",
-                    "price": "$20"}
-                    ,
-                {
-                    "app": "foodpanda",
-                    "price": "$20"},
-                    {
-                    "app": "deliveroo",
-                    "price": "$20"},
+            foodpanda_res = foodpanda_check_price(state.data.restaurant_name, state.data.delivery_location, orders, state.data.delivery_note)
+            if foodpanda_res is not None:
+                print("cek logic", not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"))
+                if not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"):
+                    print("response:", foodpanda_res)
+                    options.append(foodpanda_res)
+
+            deliveroo_res = deliveroo_check_price(state.data.restaurant_name, state.data.delivery_location, orders)
+            if deliveroo_res is not None:
+                if not (isinstance(deliveroo_res, dict) and deliveroo_res["status"] == "not_logged_in"):
+                    options.append(deliveroo_res)
+            # options = [
+            #     {
+            #         "app": "grab",
+            #         "price": "$20"}
+            #         ,
+            #     {
+            #         "app": "foodpanda",
+            #         "price": "$20"},
+            #         {
+            #         "app": "deliveroo",
+            #         "price": "$20"},
                 
-            ]
+            # ]
         print("options:", options)
         if isinstance(options, list):
             state.data.menu_options = [
@@ -629,3 +635,25 @@ def food_flow():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+    # options = []
+    # orders = [
+    #         {
+    #             "name": "big mac",
+    #             "pcs": 2,
+    #             "pref": "regular",
+    #         }
+    #     ]
+    # # grab_res = grab_check_order_food("mcdonald", "state.data.delivery_location", orders, "state.data.delivery_note")
+    # # if grab_res is not None:
+    # #     if not (isinstance(grab_res, dict) and grab_res["status"] == "not_logged_in"):
+    # #             options.append(grab_res)
+    # foodpanda_res = foodpanda_check_price("mcdonald", "state.data.delivery_location", orders, "state.data.delivery_note")
+    # if foodpanda_res is not None:
+    #     print("cek logic", not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"))
+    #     if not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"):
+    #         print("response:", foodpanda_res)
+    #         options.append(foodpanda_res)
+    # deliveroo_res = deliveroo_check_price("mcdonald", "state.data.delivery_location", orders)
+    # if deliveroo_res is not None:
+    #     if not (isinstance(deliveroo_res, dict) and deliveroo_res["status"] == "not_logged_in"):
+    #         options.append(deliveroo_res)

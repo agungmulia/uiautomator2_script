@@ -3,17 +3,17 @@ import xml.etree.ElementTree as ET
 import time
 from .utils import check_login_status, clear_unexpected_popups, accept_permissions, find_components_by_class_text, screen_components, find_components, find_components_by_id, coordinate_bounds
 from general import cache_get, cache_set
-def check_price(restaurant, dropoff, orders, note= ""):
+def check_price(restaurant, dropoff, orders):
     try:
         d = u2.connect()
         # d.app_start("com.deliveroo.orderapp", stop=False)
         d.app_start("com.deliveroo.orderapp", stop=False)
         # time.sleep(4)
-        # accept_permissions(d)
-        # clear_unexpected_popups(d)
+        accept_permissions(d)
+        clear_unexpected_popups(d)
         # # Call login checker
-        # if not check_login_status(d):
-        #     return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
+        if not check_login_status(d):
+            return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
         if d(description="Search restaurants and cuisines").exists():
             el = d(description="Search restaurants and cuisines")
             bounds_raw = el.bounds()
@@ -83,6 +83,8 @@ def check_price(restaurant, dropoff, orders, note= ""):
                         time.sleep(0.5)
                     else:
                         d.press("back")
+                    while not d(textContains="$").exists():
+                        time.sleep(0.2)
                     lists = d(textContains="$")
                     # get last element
                     price = lists[len(lists) - 1].get_text()
@@ -316,18 +318,11 @@ if __name__ == "__main__":
         "pcs": 2,
         "pref": "regular",
         "note": "No special request"
-    },
-    {
-        "name": "oatside",
-        "is_general_name": True,
-        "pcs": 1,
-        "pref": "regular",
-        "note": "No special request"
     }
     ]
     
-    # check_price(restaurant, dropoff, orders)
-    checkout()
+    check_price(restaurant, dropoff, orders)
+    # checkout()
     # special_reqs = [[ "no pineapple", "no black pepper mayo" ], ["no bigmac sauce", "no onion"]]
     # # special_reqs = [[ "no cheese" ], ["no cheese", "no curry sauce"]]
     # confirm_order(special_requests=special_reqs)

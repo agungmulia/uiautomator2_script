@@ -33,28 +33,28 @@ def check_login_status(d):
     Raises exception if something goes wrong.
     """
     try:
-        # Look for login screen indicators
-        login_keywords = ["login", "sign in", "log in"]
-        for keyword in login_keywords:
-            if d(textMatches=f"(?i)^{keyword}$").exists():
-                print("❌ Not logged in. Please log in first.")
-                return False
+        # # Look for login screen indicators
+        # login_keywords = ["login", "sign in", "log in"]
+        # for keyword in login_keywords:
+        #     if d(textMatches=f"(?i)^{keyword}$").exists():
+        #         print("❌ Not logged in. Please log in first.")
+        #         return False
 
-        # Look for home screen keywords as positive signal
-        home_keywords = ["search", "redeem", "adventure"]
-        for el in d.xpath("//*").all():
-                        try:
-                            text = el.attrib.get("text", "").strip().lower()
-                            if not text:
-                                continue
+        # # Look for home screen keywords as positive signal
+        # home_keywords = ["search", "redeem", "adventure"]
+        # for el in d.xpath("//*").all():
+        #                 try:
+        #                     text = el.attrib.get("text", "").strip().lower()
+        #                     if not text:
+        #                         continue
 
-                            for keyword in home_keywords:
-                                if keyword in text:
-                                    return True
-                        except Exception as e:
-                            print("⚠️ Could not determine login status. Assuming not logged in.")
-                            return False
-        return True
+        #                     for keyword in home_keywords:
+        #                         if keyword in text:
+        #                             return True
+        #                 except Exception as e:
+        #                     print("⚠️ Could not determine login status. Assuming not logged in.")
+        #                     return False
+        return False
     except Exception as e:
         print(f"[Error] Failed to check login status: {e}")
         return False

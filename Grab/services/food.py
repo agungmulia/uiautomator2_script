@@ -8,34 +8,34 @@ from general import find_components, coordinate_bounds, cache_get, cache_set, fi
 def check_order_food(restaurant, dropoff, orders, note=""):
     try:
         d = u2.connect()
-        d.app_start("com.grabtaxi.passenger", stop=False) 
-        # threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
-        # threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
+        d.app_start("com.grabtaxi.passenger", stop=True) 
+        threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
+        threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
 
 
-        # # Call login checker
+        # Call login checker
         # if not check_login_status(d):
         #     return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
         
-        # while not d(text="Food").exists():
-        #     time.sleep(0.2)
-        # d(text="Food").click()
+        while not d(text="Food").exists():
+            time.sleep(0.2)
+        d(text="Food").click()
 
-        # while not d(text="What shall we deliver?").exists():
-        #     time.sleep(0.2)
-        # d(text="What shall we deliver?").click()
-        # while not d(resourceId="com.grabtaxi.passenger:id/gds_appbar_search_field").exists():
-        #         time.sleep(0.2)
-        # print(d(text="Would you like to eat something?").exists())
-        # time.sleep(0.5)
-        # d(className="android.widget.EditText").send_keys(restaurant)
-        # # pick 1st element
-        # while not d(className="android.view.View")[14].exists():
-        #     time.sleep(0.2)
-        #     print("wait for search result")
-        #     # com.grabtaxi.passenger:id/deliveries_search_autocomplete
-        # print("click search result")
-        # d(className="android.view.View")[14].click()
+        while not d(text="What shall we deliver?").exists():
+            time.sleep(0.2)
+        d(text="What shall we deliver?").click()
+        while not d(resourceId="com.grabtaxi.passenger:id/gds_appbar_search_field").exists():
+                time.sleep(0.2)
+        print(d(text="Would you like to eat something?").exists())
+        time.sleep(0.5)
+        d(className="android.widget.EditText").send_keys(restaurant)
+        # pick 1st element
+        while not d(className="android.view.View")[14].exists():
+            time.sleep(0.2)
+            print("wait for search result")
+            # com.grabtaxi.passenger:id/deliveries_search_autocomplete
+        print("click search result")
+        d(className="android.view.View")[14].click()
         while not d(resourceId="com.grabtaxi.passenger:id/universal_merchant_card_compose_view").exists():
                 time.sleep(0.2)
         # avoid ads
@@ -86,10 +86,6 @@ def check_order_food(restaurant, dropoff, orders, note=""):
                         time.sleep(0.2)
                 print("confirm button")
                 # press confirm button
-                while not find_components_by_id(d, "com.grabtaxi.passenger:id/gds_button_content_layout")[0]:
-                    time.sleep(0.2)
-                time.sleep(0.2)
-
                 while not find_components_by_id(d, "com.grabtaxi.passenger:id/gds_button_content_layout")[0]:
                     time.sleep(0.2)
                     print("wait for confirm button")
@@ -238,6 +234,7 @@ def confirm_order(specials):
                 
                 while not d(resourceId="com.grabtaxi.passenger:id/gf_checkout_total").exists():
                     time.sleep(0.2)
+
                 # check voucher
                 d(scrollable=True).scroll.toEnd()
                 time.sleep(0.4)
@@ -265,6 +262,7 @@ def confirm_order(specials):
                 time.sleep(0.8)
                 # end voucher flow
                 
+                    
                 price = d(resourceId="com.grabtaxi.passenger:id/gf_checkout_total").get_text()
                 print(price)
                 return {
@@ -276,6 +274,25 @@ def confirm_order(specials):
         traceback.print_exc()
         return {"message": str(e)}
 
+def checkout(note):
+    
+    d = u2.connect()
+    d.app_start("com.grabtaxi.passenger", stop=False) 
+
+    d(scrollable=True).scroll.toBeginning()
+    time.sleep(0.3)
+    while not d(text="Delivery options").exists():
+        print("swipe")
+        d.swipe(0.5, 0.7, 0.5, 0.5, duration=0.05)
+    d(text="Add").click()
+
+    d(text="E.g. Leave it at the security post, take service lift, etc.").click()
+    d.shell(f"input text '{note}'")
+    d(text="Confirm").click()
+
+    while not d(text="Place Order").exists():
+        time.sleep(0.2)
+    d(text="Place Order").click()
 
 
 def traverse(node, parent=None, grandparent=None):
@@ -326,7 +343,8 @@ if __name__ == "__main__":
     }
     ]
     
-    check_order_food(restaurant, dropoff, orders)
+    # check_order_food(restaurant, dropoff, orders)
+    checkout("awkoakwo")
     # special_reqs = [[ "remove pineapple", "remove black pepper mayo" ]]
     # special_reqs = [[ "remove pineapple", "remove black pepper mayo" ], ["remove bigmac sauce", "remove onion"]]
     # confirm_order(special_reqs)

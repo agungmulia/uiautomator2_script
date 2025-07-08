@@ -6,14 +6,14 @@ from general import cache_get, cache_set
 def check_price(restaurant, dropoff, orders, note= ""):
     try:
         d = u2.connect()
-        d.app_start("com.global.foodpanda.android", stop=False)
-        # d.app_start("com.global.foodpanda.android", stop=True)
-        # time.sleep(2)
-        # accept_permissions(d)
-        # clear_unexpected_popups(d)
+        # d.app_start("com.global.foodpanda.android", stop=False)
+        d.app_start("com.global.foodpanda.android", stop=True)
+        time.sleep(2)
+        accept_permissions(d)
+        clear_unexpected_popups(d)
         # Call login checker
-        # if not check_login_status(d):
-        #     return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
+        if not check_login_status(d):
+            return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
         
         while not d(resourceId="HomeSearchBar").exists():
             time.sleep(0.5)
@@ -47,6 +47,8 @@ def check_price(restaurant, dropoff, orders, note= ""):
 
             while not d(resourceId="com.global.foodpanda.android:id/searchEditText").exists():
                 time.sleep(0.2)
+            # mock
+            order["name"]= "big ma"
             d(resourceId="com.global.foodpanda.android:id/searchEditText").send_keys(order["name"])
 
             while not d(resourceId="com.global.foodpanda.android:id/titleTextView").exists():
@@ -282,13 +284,7 @@ if __name__ == "__main__":
     # Example usage
     restaurant = "McDonald's"
     dropoff = "Your Address"
-    orders = [{
-        "name": "buttermilk",
-        "is_general_name": True,
-        "pcs": 2,
-        "pref": "regular",
-        "note": "No special request"
-    }, 
+    orders = [
     {
         "name": "big ma",
         "is_general_name": True,
