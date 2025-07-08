@@ -523,6 +523,7 @@ def food_flow():
         print("state.data.delivery_location:", state.data.delivery_location, "state.data.restaurant_name:", state.data.restaurant_name, "state.data.food_items:", state.data.food_items)
         if state.data.delivery_location and state.data.restaurant_name and state.data.food_items:
             state.step = "confirmation_check_pending"
+            print("update step to confirmation_check_pending")
 
     elif state.step == "login":
         # res = login_to_app(state.data.app, state.data.login_info.phone_number)
@@ -555,17 +556,30 @@ def food_flow():
         ]
         print("orders:", orders)
         if state.data.app is None:
-            grab_res = grab_check_order_food(state.data.restaurant_name, state.data.delivery_location, orders, state.data.delivery_note)
-            if grab_res is not None:
-                if not (isinstance(grab_res, dict) and grab_res["status"] == "not_logged_in"):
-                    options.append(grab_res)
+            # grab_res = grab_check_order_food(state.data.restaurant_name, state.data.delivery_location, orders, state.data.delivery_note)
+            # if grab_res is not None:
+            #     if not (isinstance(grab_res, dict) and grab_res["status"] == "not_logged_in"):
+            #         options.append(grab_res)
 
-            foodpanda_res = foodpanda_check_price(state.data.restaurant_name, state.data.delivery_location, orders, state.data.delivery_note)
-            if foodpanda_res is not None:
-                print("cek logic", not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"))
-                if not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"):
-                    print("response:", foodpanda_res)
-                    options.append(foodpanda_res)
+            # foodpanda_res = foodpanda_check_price(state.data.restaurant_name, state.data.delivery_location, orders, state.data.delivery_note)
+            # if foodpanda_res is not None:
+            #     print("cek logic", not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"))
+            #     if not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"):
+            #         print("response:", foodpanda_res)
+            #         options.append(foodpanda_res)
+            options = [
+                {
+                    "app": "grab",
+                    "price": "$20"}
+                    ,
+                {
+                    "app": "foodpanda",
+                    "price": "$20"},
+                    {
+                    "app": "deliveroo",
+                    "price": "$20"},
+                
+            ]
         print("options:", options)
         if isinstance(options, list):
             state.data.menu_options = [
@@ -585,7 +599,7 @@ def food_flow():
             return jsonify(asdict(state))
 
     elif state.step == "awaiting_user_confirmation":
-        if state.data.selected_option:
+        if state.data.app:
             state.step = "ordering_in_progress"
 
     elif state.step == "ordering_in_progress":
