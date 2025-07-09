@@ -7,7 +7,7 @@ def check_price(destination, pickup_time):
         print("init check price")
         d = u2.connect()
         d.app_start("com.codigo.comfort", stop=True)
-        time.sleep(2)
+        time.sleep(1)
         clear_unexpected_popups(d)
         # select language
         accept_permissions(d)
@@ -16,7 +16,7 @@ def check_price(destination, pickup_time):
 
         if not check_login_status(d):
             print("User is not logged in. Please log in to continue.")
-            return 
+            return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
         clear_unexpected_popups(d)
 
         # proceed book
@@ -27,19 +27,18 @@ def check_price(destination, pickup_time):
             d.click(*ride_coord)
         while not d(resourceId="txtInputDestination").exists():
             time.sleep(0.1)
-        time.sleep(0.5)
+        # time.sleep(0.2)
         d(resourceId="txtInputDestination").click()
         
         while not d(text="Where to?").exists():
             time.sleep(0.1)
-        time.sleep(0.3)
+        # time.sleep(0.3)
         d(text="Where to?").send_keys(destination)
-        screen_components(d)
 
         # choose first element in the search list
         while not d(resourceId="com.codigo.comfort:id/lblRecentLocationAddress").exists():
             time.sleep(0.1)
-        time.sleep(0.5)
+        # time.sleep(0.5)
         search_res_comps = find_components_by_id(d, "com.codigo.comfort:id/lblRecentLocationAddress")
         if search_res_comps is not None:
             search_res_comp = search_res_comps[0]
@@ -49,13 +48,13 @@ def check_price(destination, pickup_time):
         # # confirm pick up
         while not d(resourceId="btnConfirmPickUp").exists():
             time.sleep(0.1)
-        time.sleep(0.5)
+        # time.sleep(0.5)
         d(resourceId="btnConfirmPickUp").click()
 
 
         while not d(resourceId="com.codigo.comfort:id/tvApplicableFare").exists():
             time.sleep(0.1)
-        time.sleep(0.5)
+        # time.sleep(0.5)
 
         fareDescs = find_components_by_id(d, "com.codigo.comfort:id/tvFareDescription")
         fareSubDescs = find_components_by_id(d, "com.codigo.comfort:id/tvFareSubDescription")
@@ -64,7 +63,7 @@ def check_price(destination, pickup_time):
         rides = []
         for i in range(len(fareDescs)):
             rides.append({
-                "title": fareDescs[i]["text"] + " " + fareSubDescs[i]["text"],
+                "title": fareDescs[i]["text"] + fareSubDescs[i]["text"],
                 "price": fares[i]["text"]
             })
         return rides

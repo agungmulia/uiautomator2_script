@@ -1,5 +1,31 @@
 import time
 import re
+import xml.etree.ElementTree as ET
+
+def app_launch(d):
+    try:
+        # Look for login screen indicators
+        login_keywords = ["login", "sign in", "log in"]
+        for keyword in login_keywords:
+            if d(textMatches=f"(?i)^{keyword}$").exists():
+                print("❌ Not logged in. Please log in first.")
+                return True
+
+        # Look for home screen keywords as positive signal
+        home_keywords = ["search", "redeem", "adventure"]
+        xml = d.dump_hierarchy()  # Get UI XML
+        root = ET.fromstring(xml)
+        for node in root.iter():
+            print("node", node.attrib)
+            if node.attrib.get("text") is not None:  # Only include Android widgets
+                text = node.attrib.get("text", "")
+                for keyword in home_keywords:
+                        if keyword in text:
+                            return True
+        return False
+    except Exception as e:
+        print("waiting for launch")
+        return False
 def check_login_status(d):
     """
     Checks whether the user is logged in to the Grab app.
@@ -41,16 +67,11 @@ def clear_unexpected_popups(d):
     print("=== DEBUG: Checking popups ===")
 
     yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome"]
-
-    try:
-        print("=== DEBUG: All clickable elements ===")
-        texts = []
-        for el in d.xpath("//*").all():
+    texts = []
+    for el in d.xpath("//*").all():
             text = el.attrib.get("text", "").strip()
             texts.append(text.lower())
-            if text:
-                print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
-        print("texts:", texts)
+    try:
         for _ in range(3):  # Multiple attempts in case of multiple layers
             
             if any("welcome" in t.lower() for t in texts):
@@ -69,11 +90,6 @@ def clear_unexpected_popups(d):
                                     break  # stop after one match
                         except Exception as e:
                             print(f"[Error] While processing node: {e}")
-                    print("=== DEBUG: All clickable elements ===")
-                    for el in d.xpath("//*").all():
-                        text = el.attrib.get("text", "").strip()
-                        if text:
-                            print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
         print("=== DEBUG: Checking popups finished ===")
                     
     except Exception as e:
@@ -85,12 +101,11 @@ def accept_permissions(d):
     """
     print("=== DEBUG: Checking permissions ===")
     yes_word = ["ok", "yes", "accept", "allow", "turn on", "awesome"]
-    time.sleep(2)
 
     try:
         
-        for _ in range(5):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=0.5) or d(textContains="welcome").wait(timeout=0.5):
+        for _ in range(3):  # Multiple attempts in case of multiple layers
+            if d(textContains="access").wait(timeout=0.1) or d(textContains="welcome").wait(timeout=0.1):
                     print("Found text with 'access'")
                     for el in d.xpath("//*").all():
                         try:
@@ -109,8 +124,6 @@ def accept_permissions(d):
                     print("=== DEBUG: All clickable elements ===")
                     for el in d.xpath("//*").all():
                         text = el.attrib.get("text", "").strip()
-                        if text:
-                            print(f"[Node] Text: '{text}'  |  Class: {el.attrib.get('class')}")
         print("=== DEBUG: Checking permissions finished ===")
     except Exception as e:
         print(f"[Error] Unexpected error in popup cleanup: {e}")
@@ -143,7 +156,7 @@ def find_components(d, text: str):
     import xml.etree.ElementTree as ET
     root = ET.fromstring(xml)
     for node in root.iter():
-        if node.attrib.get("text") is not None and node.attrib.get("text").lower() == text:  # Only include Android widgets
+        if node.attrib.get("text") is not None and text in node.attrib.get("text").lower():  # Only include Android widgets
             res_id = node.attrib.get("resource-id", "")
             text = node.attrib.get("text", "")
             return {

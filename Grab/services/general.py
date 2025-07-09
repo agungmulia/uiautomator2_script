@@ -48,10 +48,10 @@ def clear_unexpected_popups(d):
             for selector in closers:
                 try:
                     el = d(**selector)
-                    if el.exists(timeout=0.3):
+                    if el.exists(timeout=0.1):
                         el.click()
                         print(f"[Popup] Closed: {selector}")
-                        time.sleep(0.3)
+                        time.sleep(0.2)
                 except Exception as e:
                     print(f"[Warning] Error closing popup: {selector} → {e}")
     except Exception as e:
@@ -66,7 +66,7 @@ def accept_permissions(d):
 
     try:
         for _ in range(5):  # Multiple attempts in case of multiple layers
-            if d(textContains="access").wait(timeout=1):
+            if d(textContains="access").wait(timeout=0.1):
                     print("Found text with 'access'")
                     for selector in yes_word:
                         try:
@@ -104,3 +104,26 @@ def notify_n8n(chat_id, message):
         print(f"n8n Webhook response: {response.status_code} - {response.text}")
     except Exception as e:
         print(f"Failed to notify n8n: {e}")
+
+def screen_components(d):
+    xml = d.dump_hierarchy()  # Get UI XML
+    import xml.etree.ElementTree as ET
+    root = ET.fromstring(xml)
+    elements = []
+    for node in root.iter():
+        if (not node.attrib.get("package", "").startswith("com.android")) and node.attrib.get("clickable") == "true":  # Only include Android widgets
+            print(node.attrib)
+        res_id = node.attrib.get("resource-id", "")
+        text = node.attrib.get("text", "")
+        if res_id or text:  # Only include elements with at least one property
+            elements.append({
+                "resource-id": res_id,
+                "text": text,
+                "class": node.attrib.get("class", ""),
+                "bounds": node.attrib.get("bounds", ""),
+                "clickable": node.attrib.get("clickable", "")
+            })
+    # Print all elements with both properties
+    for elem in elements:
+        if elem["resource-id"] and elem["text"]:
+            print(f"ID: {elem['resource-id']} | Text: '{elem['text']}' | Class: {elem['class']} | Bounds: {elem['bounds']} | Clickable: {elem['clickable']}")
