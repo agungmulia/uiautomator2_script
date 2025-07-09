@@ -1,6 +1,4 @@
-from flask import Flask, request, jsonify, abort
-import hmac, hashlib, time
-from pathlib import Path
+from flask import Flask, request, jsonify
 from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler, login as grab_login,  cancel_ride as grab_cancel_ride
 from Grab.services.login import login_otp as grab_login_otp
 from Grab.services.food import check_order_food as grab_check_order_food, checkout as grab_checkout
@@ -634,35 +632,7 @@ def food_flow():
     print("sent state: ", state)
     return jsonify(asdict(state))
 
-def verify_hmac(request):
-    received_signature = request.headers.get("X-Signature")
-    if not received_signature:
-        return False
-    SHARED_SECRET = ""
-    secret_path = Path.home() / ".secret" / "secret.key"
-    if secret_path.exists():
-        with open(secret_path, "rb") as f:
-            SHARED_SECRET = f.read().strip()
-    else:
-        print(f"[WARN] Secret file not found at {secret_path}, using default key.")
-        SHARED_SECRET = b"secret"
-    # Construct the message (you can customize this)
-    message = request.get_data()  # Raw body content
 
-    # Generate HMAC using secret
-    expected_signature = hmac.new(SHARED_SECRET, message, hashlib.sha256).hexdigest()
-
-    return hmac.compare_digest(received_signature, expected_signature)
-
-@app.before_request
-def hmac_auth_middleware():
-    if not verify_hmac(request):
-            abort(401, "Invalid token")
-
-# test auth endpoint
-@app.route("/indextest", methods=["POST"])
-def indextest():
-    return "API is running", 200
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
     # options = []
