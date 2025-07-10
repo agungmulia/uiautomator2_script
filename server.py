@@ -23,12 +23,26 @@ from tada.check_price import check_price as tada_check_price
 from tada.book_ride import book_ride as tada_book_ride
 from tada.cancel_ride import cancel_ride as tada_cancel_ride
 
+import os
 import time
 from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info, FoodOrderData, parse_food_items, parse_order_result, parse_menu_options, MenuOption, OrderResult
 import time
 from dataclasses import asdict
 
 app = Flask(__name__)
+
+def sign_hmac(secret: bytes, payload: str):
+    return hmac.new(secret, payload.encode(), hashlib.sha256).hexdigest()
+
+def load_secret_key(path=os.path.expanduser("~/.secret/secret.key")):
+    try:
+        with open(path, 'r') as file:
+            return file.read().strip().encode()
+    except Exception:
+        # Secret missing → return empty bytes (invalid HMAC will fail safely)
+        return b''
+
+SECRET = load_secret_key()
 
 @app.route("/ping", methods=["GET"])
 def ping():
@@ -213,6 +227,17 @@ def all_transport_app():
 @app.route("/transport/flow", methods=["POST"])
 def transport_flow():
     req = request.get_json()
+
+    received_sig = request.headers.get('X-Signature')
+    expected_sig = hmac.new(SECRET, req, hashlib.sha256).hexdigest()
+
+    if not hmac.compare_digest(received_sig, expected_sig):
+        return jsonify({
+            "success": False,
+            "error": "Invalid HMAC signature",
+            "expected_sig": expected_sig,
+            "code": 403
+        }), 403
 
     flow = req.get("flow")
     step = req.get("step")
@@ -497,6 +522,17 @@ def transport_flow():
 @app.route("/food/flow", methods=["POST"])
 def food_flow():
     req = request.get_json()
+
+    received_sig = request.headers.get('X-Signature')
+    expected_sig = hmac.new(SECRET, req, hashlib.sha256).hexdigest()
+
+    if not hmac.compare_digest(received_sig, expected_sig):
+        return jsonify({
+            "success": False,
+            "error": "Invalid HMAC signature",
+            "expected_sig": expected_sig,
+            "code": 403
+        }), 403
 
     flow = req.get("flow")
     step = req.get("step")
