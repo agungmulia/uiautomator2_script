@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify, abort
 import hmac, hashlib, time
 from pathlib import Path
-from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler, login as grab_login,  cancel_ride as grab_cancel_ride
-from Grab.services.login import login_otp as grab_login_otp
+from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler,  cancel_ride as grab_cancel_ride
+from Grab.services.login import login_otp as grab_login_otp, login as grab_login
 from Grab.services.food import check_order_food as grab_check_order_food, checkout as grab_checkout
 from ryde.service.check_price import check_price as ryde_check_price
 from ryde.service.book_ride import book_ride as ryde_book_ride
