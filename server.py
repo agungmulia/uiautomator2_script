@@ -24,6 +24,7 @@ from tada.book_ride import book_ride as tada_book_ride
 from tada.cancel_ride import cancel_ride as tada_cancel_ride
 
 import os
+import json
 import time
 from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info, FoodOrderData, parse_food_items, parse_order_result, parse_menu_options, MenuOption, OrderResult
 import time
@@ -229,7 +230,7 @@ def transport_flow():
     req = request.get_json()
 
     received_sig = request.headers.get('X-Signature')
-    expected_sig = hmac.new(SECRET, req, hashlib.sha256).hexdigest()
+    expected_sig = hmac.new(SECRET, json.dumps(req, separators=(",", ":")), hashlib.sha256).hexdigest()
 
     if not hmac.compare_digest(received_sig, expected_sig):
         return jsonify({
@@ -524,7 +525,7 @@ def food_flow():
     req = request.get_json()
 
     received_sig = request.headers.get('X-Signature')
-    expected_sig = hmac.new(SECRET, req, hashlib.sha256).hexdigest()
+    expected_sig = hmac.new(SECRET, json.dumps(req, separators=(",", ":")), hashlib.sha256).hexdigest()
 
     if not hmac.compare_digest(received_sig, expected_sig):
         return jsonify({
