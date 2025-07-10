@@ -230,7 +230,7 @@ def transport_flow():
     req = request.get_json()
 
     received_sig = request.headers.get('X-Signature')
-    expected_sig = hmac.new(SECRET, json.dumps(req, separators=(",", ":")), hashlib.sha256).hexdigest()
+    expected_sig = hmac.new(SECRET, json.dumps(req, separators=(",", ":")).encode(), hashlib.sha256).hexdigest()
 
     if not hmac.compare_digest(received_sig, expected_sig):
         return jsonify({
@@ -525,7 +525,7 @@ def food_flow():
     req = request.get_json()
 
     received_sig = request.headers.get('X-Signature')
-    expected_sig = hmac.new(SECRET, json.dumps(req, separators=(",", ":")), hashlib.sha256).hexdigest()
+    expected_sig = hmac.new(SECRET, json.dumps(req, separators=(",", ":")).encode(), hashlib.sha256).hexdigest()
 
     if not hmac.compare_digest(received_sig, expected_sig):
         return jsonify({
