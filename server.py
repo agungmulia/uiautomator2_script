@@ -641,7 +641,7 @@ def food_flow():
 def trigger_tunnel():
     data = request.get_json()
     tunnel_name = data.get('name')
-    user_id = data.get('user_id')
+    user_id = data.get('userId')
     secret = data.get('secret')
 
     if not tunnel_name:
