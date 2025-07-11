@@ -32,19 +32,6 @@ from dataclasses import asdict
 
 app = Flask(__name__)
 
-def sign_hmac(secret: bytes, payload: str):
-    return hmac.new(secret, payload.encode(), hashlib.sha256).hexdigest()
-
-def load_secret_key(path=os.path.expanduser("~/.secret/secret.key")):
-    try:
-        with open(path, 'r') as file:
-            return file.read().strip().encode()
-    except Exception:
-        # Secret missing → return empty bytes (invalid HMAC will fail safely)
-        return b''
-
-SECRET = load_secret_key()
-
 @app.route("/ping", methods=["GET"])
 def ping():
     return "API is running", 200
@@ -228,17 +215,6 @@ def all_transport_app():
 @app.route("/transport/flow", methods=["POST"])
 def transport_flow():
     req = request.get_json()
-
-    received_sig = request.headers.get('X-Signature')
-    expected_sig = hmac.new(SECRET, json.dumps(req, separators=(",", ":")).encode(), hashlib.sha256).hexdigest()
-
-    if not hmac.compare_digest(received_sig, expected_sig):
-        return jsonify({
-            "success": False,
-            "error": "Invalid HMAC signature",
-            "expected_sig": expected_sig,
-            "code": 403
-        }), 403
 
     flow = req.get("flow")
     step = req.get("step")
@@ -524,17 +500,6 @@ def transport_flow():
 def food_flow():
     req = request.get_json()
 
-    received_sig = request.headers.get('X-Signature')
-    expected_sig = hmac.new(SECRET, json.dumps(req, separators=(",", ":")).encode(), hashlib.sha256).hexdigest()
-
-    if not hmac.compare_digest(received_sig, expected_sig):
-        return jsonify({
-            "success": False,
-            "error": "Invalid HMAC signature",
-            "expected_sig": expected_sig,
-            "code": 403
-        }), 403
-
     flow = req.get("flow")
     step = req.get("step")
     raw_data = req.get("data", {})
@@ -694,7 +659,7 @@ def verify_hmac(request):
 @app.before_request
 def hmac_auth_middleware():
     if not verify_hmac(request):
-            abort(401, "Invalid token")
+            return jsonify({"error": "Unauthorized", "message": "Invalid Token"}), 403
 
 # test auth endpoint
 @app.route("/indextest", methods=["POST"])
