@@ -691,7 +691,7 @@ def hmac_auth_middleware():
     if request.endpoint in excluded_routes:
         return 
     if not verify_hmac(request):
-            return jsonify({"error": "Unauthorized", "message": "Invalid Token"}), 403
+            return jsonify({"error": "Unauthorized", "message": "Invalid Token", "end-point": request.endpoint}), 403
 
 # test auth endpoint
 @app.route("/indextest", methods=["POST"])
