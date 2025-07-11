@@ -648,6 +648,8 @@ def trigger_tunnel():
         return jsonify({'error': 'Missing tunnel name'}), 400
     if not user_id:
         return jsonify({'error': 'Missing user id'}), 400
+    if not secret:
+        return jsonify({'error': 'Missing secret'}), 400
 
     try:
         process = subprocess.Popen(
