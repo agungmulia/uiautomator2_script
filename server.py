@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify
+import subprocess
 import hmac, hashlib, time
 from pathlib import Path
 from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler,  cancel_ride as grab_cancel_ride
@@ -636,6 +637,34 @@ def food_flow():
     print("sent state: ", state)
     return jsonify(asdict(state))
 
+@app.route('/register-tunnel', methods=['POST'])
+def trigger_tunnel():
+    data = request.get_json()
+    tunnel_name = data.get('name')
+    user_id = data.get('user_id')
+    secret = data.get('secret')
+
+    if not tunnel_name:
+        return jsonify({'error': 'Missing tunnel name'}), 400
+    if not user_id:
+        return jsonify({'error': 'Missing user id'}), 400
+
+    try:
+        process = subprocess.Popen(
+            ["bash", "./start-tunnel.sh", tunnel_name, user_id, secret],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+        return jsonify({
+            "message": f"Tunnel '{tunnel_name}' is launching in background.",
+            "pid": process.pid
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 def verify_hmac(request):
     received_signature = request.headers.get("X-Signature")
     if not received_signature:
@@ -658,6 +687,9 @@ def verify_hmac(request):
 
 @app.before_request
 def hmac_auth_middleware():
+    excluded_routes = ['indextest','register-tunnel']  # Name of the view function
+    if request.endpoint in excluded_routes:
+        return 
     if not verify_hmac(request):
             return jsonify({"error": "Unauthorized", "message": "Invalid Token"}), 403
 
@@ -665,6 +697,7 @@ def hmac_auth_middleware():
 @app.route("/indextest", methods=["POST"])
 def indextest():
     return "API is running", 200
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
     # options = []
