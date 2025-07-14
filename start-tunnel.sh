@@ -34,10 +34,10 @@ else
 
   # Call backend to create tunnel with given name
 
-  RESPONSE=$(eval curl -s -X POST https://1wzpbwv2-3000.asse.devtunnels.ms/cloudflare \
-  -H \"Content-Type: application/json\" \
+  RESPONSE=$(curl -s -X POST https://1wzpbwv2-3000.asse.devtunnels.ms/cloudflare \
+  -H "Content-Type: application/json" \
   -H "X-Signature: $SIGNATURE" \
-  -d "'$PAYLOAD'")
+  -d "$PAYLOAD")
 
   # Extract fields
   TUNNEL_ID=$(echo "$RESPONSE" | jq -r '.tunnel_id')
