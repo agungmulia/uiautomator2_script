@@ -8,12 +8,15 @@ echo "========== Cloudflare Tunnel Launcher =========="
 TUNNEL_NAME="${1:-termux-agent-default}"
 USER_ID="${2:-userId}"
 SECRET="${3:-DEFAULT_KEY}"
+  echo "[✓] Existing tunnel metadata found."
 
 SIGNATURE_HEADER=""
 if [ -n "$USER_ID" ]; then
   TIMESTAMP=$(date +%s)
   PAYLOAD="{\"name\": \"$TUNNEL_NAME\", \"userId\": \"$USER_ID\", \"timestamp\": $TIMESTAMP}"
+
   SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | sed 's/^.* //')
+  SIGNATURE_HEADER="-H \"X-Signature: $SIGNATURE\""
 else
   PAYLOAD="{\"name\": \"$TUNNEL_NAME\"}"
 fi
@@ -34,13 +37,10 @@ else
 
   # Call backend to create tunnel with given name
 
-  RESPONSE=$(curl -s -X POST https://1wzpbwv2-3000.asse.devtunnels.ms/cloudflare \
-  -H "Content-Type: application/json" \
-  -H "X-signature: $SIGNATURE" \
-  -H "x-custom-signature: $SIGNATURE" \
-  -d "$(echo "$PAYLOAD" | jq -c .)")
-
-  
+  RESPONSE=$(eval curl -s -X POST https://1wzpbwv2-3000.asse.devtunnels.ms/cloudflare \
+  -H \"Content-Type: application/json\" \
+  $SIGNATURE_HEADER \
+  -d "'$PAYLOAD'")
 
   # Extract fields
   TUNNEL_ID=$(echo "$RESPONSE" | jq -r '.tunnel_id')
