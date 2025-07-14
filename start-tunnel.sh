@@ -56,20 +56,21 @@ else
   fi
 
   # Save credentials and config
-  echo "$CREDENTIALS" > "$TUNNEL_DIR/$TUNNEL_ID.json"
-  chmod 400 "$TUNNEL_DIR/$TUNNEL_ID.json"
+  # echo "$CREDENTIALS" > "$TUNNEL_DIR/$TUNNEL_ID.json"
+  # chmod 400 "$TUNNEL_DIR/$TUNNEL_ID.json"
 
-  echo "$CONFIG_YAML" > "$TUNNEL_DIR/config.yml"
-  chmod 400 "$TUNNEL_DIR/config.yml"
+  # echo "$CONFIG_YAML" > "$TUNNEL_DIR/config.yml"
+  # chmod 400 "$TUNNEL_DIR/config.yml"
 
-  echo "{\"tunnel_id\": \"$TUNNEL_ID\"}" > "$TUNNEL_META"
-  chmod 600 "$TUNNEL_META"
+  # echo "{\"tunnel_id\": \"$TUNNEL_ID\"}" > "$TUNNEL_META"
+  # chmod 600 "$TUNNEL_META"
 
   echo "[✓] Tunnel '$TUNNEL_NAME' initialized."
 fi
 
 SECRET_DIR="$HOME/.secret"
 SECRET_FILE="$SECRET_DIR/secret.key"
+TOKEN_FILE="$SECRET_DIR/token.key"
 
 echo "[DEBUG] HOME=$HOME"
 echo "[DEBUG] SECRET_FILE=$SECRET_FILE"
@@ -79,6 +80,7 @@ chmod 700 "$SECRET_DIR"
 
 # Try writing
 echo "$SECRET" > "$SECRET_FILE"
+echo "$TUNNEL_TOKEN" > "$TOKEN_FILE"
 
 # Check success/failure of write
 if [ $? -ne 0 ]; then
@@ -89,4 +91,4 @@ else
 fi
 
 echo "[*] Launching tunnel with cloudflared..."
-cloudflared tunnel --config "$TUNNEL_DIR/config.yml" run
+cloudflared tunnel --token "$(cat "$TOKEN_FILE")"
