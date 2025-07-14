@@ -659,6 +659,17 @@ def trigger_tunnel():
             text=True
         )
 
+        boot_dir = os.path.expanduser("~/.termux/boot")
+        health_script_path = os.path.join(boot_dir, "health-check.sh")
+        cron_script_path = os.path.join(boot_dir, "health-check-cron.sh")
+
+        base_url = f"https://{tunnel_name}.heypico1.xyz"
+        subprocess.run([
+            "sed", "-i", f"s|^BASE_URL=.*|BASE_URL=\\\"{base_url}\\\"|", health_script_path
+        ])
+
+        subprocess.Popen(["bash", cron_script_path])
+
         return jsonify({
             "message": f"Tunnel '{tunnel_name}' is launching in background.",
             "pid": process.pid
