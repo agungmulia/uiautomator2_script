@@ -672,7 +672,10 @@ def trigger_tunnel():
 
         return jsonify({
             "message": f"Tunnel '{tunnel_name}' is launching in background.",
-            "pid": process.pid
+            "pid": process.pid,
+            "tunnel_name": tunnel_name,
+            "user_id": user_id,
+            "secret": secret
         })
 
     except Exception as e:
