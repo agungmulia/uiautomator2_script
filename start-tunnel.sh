@@ -8,6 +8,7 @@ echo "========== Cloudflare Tunnel Launcher =========="
 TUNNEL_NAME="${1:-termux-agent-default}"
 USER_ID="${2:-userId}"
 SECRET="${3:-DEFAULT_KEY}"
+echo "$TUNNEL_NAME $USER_ID $SECRET"
 
 SIGNATURE_HEADER=""
 if [ -n "$USER_ID" ]; then
