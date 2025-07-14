@@ -33,8 +33,8 @@ from dataclasses import asdict
 
 app = Flask(__name__)
 
-@app.route("/ping", methods=["GET"])
-def ping():
+@app.route("/health_check", methods=["GET"])
+def healthCheck():
     return "API is running", 200
 
 @app.route("/grab", methods=["POST"])
@@ -689,7 +689,7 @@ def verify_hmac(request):
 
 @app.before_request
 def hmac_auth_middleware():
-    excluded_routes = ['indextest','trigger_tunnel']  # Name of the view function
+    excluded_routes = ['healthCheck','trigger_tunnel']  # Name of the view function
     if request.endpoint in excluded_routes:
         return 
     if not verify_hmac(request):
