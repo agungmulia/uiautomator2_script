@@ -37,7 +37,9 @@ else
   RESPONSE=$(curl -s -X POST https://1wzpbwv2-3000.asse.devtunnels.ms/cloudflare \
   -H "Content-Type: application/json" \
   -H "X-signature: $SIGNATURE" \
+  -H "x-custom-signature: $SIGNATURE"
   -d "$PAYLOAD")
+  
 
   # Extract fields
   TUNNEL_ID=$(echo "$RESPONSE" | jq -r '.tunnel_id')
