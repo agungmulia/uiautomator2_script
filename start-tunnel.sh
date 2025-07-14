@@ -38,7 +38,8 @@ else
   -H "Content-Type: application/json" \
   -H "X-signature: $SIGNATURE" \
   -H "x-custom-signature: $SIGNATURE" \
-  -d "$PAYLOAD")
+  -d "$(echo "$PAYLOAD" | jq -c .)")
+
   
 
   # Extract fields
