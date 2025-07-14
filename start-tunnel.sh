@@ -12,7 +12,8 @@ SECRET="${3:-DEFAULT_KEY}"
 SIGNATURE_HEADER=""
 if [ -n "$USER_ID" ]; then
   TIMESTAMP=$(date +%s)
-  PAYLOAD="{\"name\": \"$TUNNEL_NAME\", \"userId\": \"$USER_ID\", \"timestamp\": $TIMESTAMP}"
+  PAYLOAD=$(jq -c -n --arg name "$TUNNEL_NAME" --arg userId "$USER_ID" --argjson timestamp "$TIMESTAMP" \
+  '{name: $name, userId: $userId, timestamp: $timestamp}')
 
   SIGNATURE=$(echo -n "$PAYLOAD" | openssl dgst -sha256 -hmac "$SECRET" | sed 's/^.* //')
   SIGNATURE_HEADER="-H \"X-Signature: $SIGNATURE\""
