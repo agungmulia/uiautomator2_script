@@ -636,6 +636,44 @@ def food_flow():
 
     print("sent state: ", state)
     return jsonify(asdict(state))
+@app.route('/stop-tunnel', methods=['POST'])
+def stop_tunnel():
+    data = request.get_json()
+    tunnel_name = data.get('name')
+
+    if not tunnel_name:
+        return jsonify({'error': 'Missing tunnel name'}), 400
+
+    screen_name = tunnel_name  # or "tunnel" if fixed
+
+    try:
+        # Check if screen session exists
+        screen_list = subprocess.check_output(["screen", "-ls"], text=True)
+        if f"\t{screen_name}\t" in screen_list or f".{screen_name}\t" in screen_list:
+            subprocess.run(["screen", "-S", screen_name, "-X", "quit"], check=False)
+            print(f"Stopped screen session: {screen_name}")
+        else:
+            # Fallback: try killing cloudflared directly
+            subprocess.run(["pkill", "-f", "cloudflared"], check=False)
+            print("No screen session found. Fallback to pkill cloudflared.")
+
+        # Remove health-check cron entry
+        cron_line = "/data/data/com.termux/files/home/.termux/boot/health-check-cron.sh"
+        try:
+            current_cron = subprocess.check_output(["crontab", "-l"], text=True)
+            new_cron = "\n".join(
+                line for line in current_cron.splitlines()
+                if cron_line not in line
+            )
+            subprocess.run(["crontab", "-"], input=new_cron, text=True, check=True)
+            print("Cron job removed.")
+        except subprocess.CalledProcessError:
+            print("No crontab set yet — skipping removal.")
+        return jsonify({
+            "message": f"Tunnel '{tunnel_name}' stopped and cron removed (if any)."
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/register-tunnel', methods=['POST'])
 def trigger_tunnel():
