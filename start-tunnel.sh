@@ -36,7 +36,7 @@ else
 
   RESPONSE=$(curl -s -X POST https://1wzpbwv2-3000.asse.devtunnels.ms/cloudflare \
   -H "Content-Type: application/json" \
-  -H "X-Signature: $SIGNATURE" \
+  -H "X-signature: $SIGNATURE" \
   -d "$PAYLOAD")
 
   # Extract fields
