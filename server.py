@@ -26,6 +26,7 @@ from tada.cancel_ride import cancel_ride as tada_cancel_ride
 
 import os
 import json
+import shutil
 import time
 from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info, FoodOrderData, parse_food_items, parse_order_result, parse_menu_options, MenuOption, OrderResult
 import time
@@ -639,12 +640,7 @@ def food_flow():
 @app.route('/stop-tunnel', methods=['POST'])
 def stop_tunnel():
     data = request.get_json()
-    tunnel_name = data.get('name')
-
-    if not tunnel_name:
-        return jsonify({'error': 'Missing tunnel name'}), 400
-
-    screen_name = tunnel_name  # or "tunnel" if fixed
+    screen_name = "tunnel"  # or "tunnel" if fixed
 
     try:
         # Check if screen session exists
@@ -669,6 +665,12 @@ def stop_tunnel():
             print("Cron job removed.")
         except subprocess.CalledProcessError:
             print("No crontab set yet — skipping removal.")
+
+        secret_path = os.path.expanduser("~/.secret")
+        if os.path.exists(secret_path) and os.path.isdir(secret_path):
+            shutil.rmtree(secret_path)
+            print("~/.secret folder removed.")
+
         return jsonify({
             "message": f"Tunnel '{tunnel_name}' stopped and cron removed (if any)."
         })
@@ -700,7 +702,7 @@ def trigger_tunnel():
         boot_dir = os.path.expanduser("~/.termux/boot")
         health_script_path = os.path.join(boot_dir, "health-check.sh")
         cron_script_path = os.path.join(boot_dir, "health-check-cron.sh")
-
+ 
         base_url = f"https://{tunnel_name}.heypico1.xyz"
         subprocess.run([
             "sed", "-i", f"s|^BASE_URL=.*|BASE_URL=\\\"{base_url}\\\"|", health_script_path
