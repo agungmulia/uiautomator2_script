@@ -91,4 +91,4 @@ else
 fi
 
 echo "[*] Launching tunnel with cloudflared..."
-cloudflared tunnel --no-autoupdate run --token "$(cat "$TOKEN_FILE")"
+cloudflared tunnel run --token "$(cat "$TOKEN_FILE")"

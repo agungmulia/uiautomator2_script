@@ -699,11 +699,6 @@ def trigger_tunnel():
             text=True
         )
 
-        stdout, stderr = process.communicate()
-
-        print("[STDOUT]", stdout)
-        print("[STDERR]", stderr)
-
         boot_dir = os.path.expanduser("~/.termux/boot")
         health_script_path = os.path.join(boot_dir, "health-check.sh")
         cron_script_path = os.path.join(boot_dir, "health-check-cron.sh")
