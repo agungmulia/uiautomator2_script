@@ -42,6 +42,8 @@ else
   -H "X-Signature: $SIGNATURE" \
   -d "$PAYLOAD")
 
+  echo "$RESPONSE"
+
   # Extract fields
   TUNNEL_ID=$(echo "$RESPONSE" | jq -r '.tunnel_id')
   TUNNEL_NAME=$(echo "$RESPONSE" | jq -r '.tunnel_name')
