@@ -40,6 +40,8 @@ else
 
   # Call backend to create tunnel with given name
 
+  echo "$PAYLOAD"
+
   RESPONSE=$(curl -s -X POST https://1wzpbwv2-3000.asse.devtunnels.ms/cloudflare \
   -H "Content-Type: application/json" \
   -H "X-Signature: $SIGNATURE" \
@@ -83,4 +85,4 @@ else
 fi
 
 echo "[*] Launching tunnel with cloudflared..."
-cloudflared tunnel run --token "$(cat "$TOKEN_FILE")"
+cloudflared tunnel run --token $TUNNEL_TOKEN
