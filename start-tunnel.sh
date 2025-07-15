@@ -25,13 +25,16 @@ fi
 TUNNEL_DIR="$HOME/.cloudflared"
 TUNNEL_META="$TUNNEL_DIR/tunnel-meta.json"
 
+SECRET_DIR="$HOME/.secret"
+SECRET_FILE="$SECRET_DIR/secret.key"
+TOKEN_FILE="$SECRET_DIR/token.key"
+
 # Create tunnel directory if not exists
 mkdir -p "$TUNNEL_DIR"
 
 # Check if we already have a saved tunnel
-if [ -f "$TUNNEL_META" ]; then
-  echo "[✓] Existing tunnel metadata found."
-  TUNNEL_ID=$(jq -r '.tunnel_id' "$TUNNEL_META")
+if [ -f "$TOKEN_FILE" ]; then
+  echo "[✓] Existing tunnel token found."
 else
   echo "[+] No tunnel found. Requesting setup from backend..."
 
@@ -57,22 +60,9 @@ else
     exit 1
   fi
 
-  # Save credentials and config
-  # echo "$CREDENTIALS" > "$TUNNEL_DIR/$TUNNEL_ID.json"
-  # chmod 400 "$TUNNEL_DIR/$TUNNEL_ID.json"
-
-  # echo "$CONFIG_YAML" > "$TUNNEL_DIR/config.yml"
-  # chmod 400 "$TUNNEL_DIR/config.yml"
-
-  # echo "{\"tunnel_id\": \"$TUNNEL_ID\"}" > "$TUNNEL_META"
-  # chmod 600 "$TUNNEL_META"
-
   echo "[✓] Tunnel '$TUNNEL_NAME' initialized."
 fi
 
-SECRET_DIR="$HOME/.secret"
-SECRET_FILE="$SECRET_DIR/secret.key"
-TOKEN_FILE="$SECRET_DIR/token.key"
 
 echo "[DEBUG] HOME=$HOME"
 echo "[DEBUG] SECRET_FILE=$SECRET_FILE"
