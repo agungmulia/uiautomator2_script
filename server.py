@@ -692,12 +692,11 @@ def trigger_tunnel():
         return jsonify({'error': 'Missing secret'}), 400
 
     try:
-        log_file = open(os.path.expanduser("~/.termux/boot/tunnel.log"), "a")
         process = subprocess.Popen(
             ["bash", "./start-tunnel.sh", tunnel_name, user_id, secret],
-            stdout=log_file,
-            stderr=log_file,
-            start_new_session=True
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
         )
 
         boot_dir = os.path.expanduser("~/.termux/boot")

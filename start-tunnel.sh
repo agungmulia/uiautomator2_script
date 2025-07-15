@@ -85,4 +85,4 @@ else
 fi
 
 echo "[*] Launching tunnel with cloudflared..."
-cloudflared tunnel run --token $TUNNEL_TOKEN
+cloudflared tunnel run --token "$(cat "$TOKEN_FILE")"
