@@ -105,7 +105,7 @@ def accept_permissions(d):
     try:
         for _ in range(5):  # Multiple attempts
             # Check if permission dialog is present
-            if d(textContains="Welcome").wait(timeout=0.3) or d(textContains="Share").wait(timeout=0.3):
+            if d(textContains="Welcome").wait(timeout=0.3) or d(textContains="Allow").wait(timeout=0.3):
                 print("Found permission dialog")
 
                 # Scan all nodes once

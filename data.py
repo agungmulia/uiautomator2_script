@@ -132,6 +132,24 @@ class FoodOrderData:
     order_result: OrderResult = field(default_factory=OrderResult)
     cancelled: bool = False
 
+class MessageLoginInfo:
+    qr: str = ""
+@dataclass
+class MessageAddContact:
+    name: str
+    number: str
+    app: str
+
+@dataclass
+class MessageData:
+    step: str
+    app: str
+    to: str
+    message: str
+    add_contact: Optional[MessageAddContact] = None
+    image: str = ""
+    login_qr: str = ""
+
 @dataclass
 class FlowState:
     flow: str

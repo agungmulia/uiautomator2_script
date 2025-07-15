@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify, abort
 import hmac, hashlib, time
 from pathlib import Path
-from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler, login as grab_login,  cancel_ride as grab_cancel_ride
-from Grab.services.login import login_otp as grab_login_otp
+from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler
+from Grab.services.login import login_otp as grab_login_otp, login as grab_login
+from Grab.services.cancel_ride import cancel_ride as grab_cancel_ride
 from Grab.services.food import check_order_food as grab_check_order_food, checkout as grab_checkout
 from ryde.service.check_price import check_price as ryde_check_price
 from ryde.service.book_ride import book_ride as ryde_book_ride
@@ -24,7 +25,7 @@ from tada.book_ride import book_ride as tada_book_ride
 from tada.cancel_ride import cancel_ride as tada_cancel_ride
 
 import time
-from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info, FoodOrderData, parse_food_items, parse_order_result, parse_menu_options, MenuOption, OrderResult
+from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info, FoodOrderData, parse_food_items, parse_order_result, parse_menu_options, MenuOption, OrderResult, MessageData
 import time
 from dataclasses import asdict
 
@@ -32,6 +33,9 @@ app = Flask(__name__)
 
 @app.route("/ping", methods=["GET"])
 def ping():
+    return "API is running", 200
+@app.route("/health_check", methods=["GET"])
+def health():
     return "API is running", 200
 
 @app.route("/grab", methods=["POST"])
@@ -634,6 +638,36 @@ def food_flow():
     print("sent state: ", state)
     return jsonify(asdict(state))
 
+@app.route("/messaging/flow", methods=["POST"])
+def message_flow():
+    req = request.get_json()
+
+    step = req.get("step")
+    raw_data = req.get("data", {})
+    print("step:", step, "raw data:", raw_data)
+
+    data = MessageData(
+        step=raw_data.get("step", ""),
+        app=raw_data.get("app", ""),
+        to=raw_data.get("to", ""),
+        message=raw_data.get("message", ""),
+        image=raw_data.get("image", ""),
+        login_qr=raw_data.get("login_qr", "")
+    )
+
+    if step == "login":
+        data.login_qr = ""
+    elif step == "send_message":
+        # send message flow
+        res = {
+            "status": "not_logged_in",
+            "login_qr": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAApgAAAKYB3X3/OAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANCSURBVEiJtZZPbBtFFMZ/M7ubXdtdb1xSFyeilBapySVU8h8OoFaooFSqiihIVIpQBKci6KEg9Q6H9kovIHoCIVQJJCKE1ENFjnAgcaSGC6rEnxBwA04Tx43t2FnvDAfjkNibxgHxnWb2e/u992bee7tCa00YFsffekFY+nUzFtjW0LrvjRXrCDIAaPLlW0nHL0SsZtVoaF98mLrx3pdhOqLtYPHChahZcYYO7KvPFxvRl5XPp1sN3adWiD1ZAqD6XYK1b/dvE5IWryTt2udLFedwc1+9kLp+vbbpoDh+6TklxBeAi9TL0taeWpdmZzQDry0AcO+jQ12RyohqqoYoo8RDwJrU+qXkjWtfi8Xxt58BdQuwQs9qC/afLwCw8tnQbqYAPsgxE1S6F3EAIXux2oQFKm0ihMsOF71dHYx+f3NND68ghCu1YIoePPQN1pGRABkJ6Bus96CutRZMydTl+TvuiRW1m3n0eDl0vRPcEysqdXn+jsQPsrHMquGeXEaY4Yk4wxWcY5V/9scqOMOVUFthatyTy8QyqwZ+kDURKoMWxNKr2EeqVKcTNOajqKoBgOE28U4tdQl5p5bwCw7BWquaZSzAPlwjlithJtp3pTImSqQRrb2Z8PHGigD4RZuNX6JYj6wj7O4TFLbCO/Mn/m8R+h6rYSUb3ekokRY6f/YukArN979jcW+V/S8g0eT/N3VN3kTqWbQ428m9/8k0P/1aIhF36PccEl6EhOcAUCrXKZXXWS3XKd2vc/TRBG9O5ELC17MmWubD2nKhUKZa26Ba2+D3P+4/MNCFwg59oWVeYhkzgN/JDR8deKBoD7Y+ljEjGZ0sosXVTvbc6RHirr2reNy1OXd6pJsQ+gqjk8VWFYmHrwBzW/n+uMPFiRwHB2I7ih8ciHFxIkd/3Omk5tCDV1t+2nNu5sxxpDFNx+huNhVT3/zMDz8usXC3ddaHBj1GHj/As08fwTS7Kt1HBTmyN29vdwAw+/wbwLVOJ3uAD1wi/dUH7Qei66PfyuRj4Ik9is+hglfbkbfR3cnZm7chlUWLdwmprtCohX4HUtlOcQjLYCu+fzGJH2QRKvP3UNz8bWk1qMxjGTOMThZ3kvgLI5AzFfo379UAAAAASUVORK5CYII="
+        }
+        if res["status"] == "not_logged_in":
+            data.login_qr = res["login_qr"]
+
+    print("data:", data)
+    return jsonify(asdict(data))
 def verify_hmac(request):
     received_signature = request.headers.get("X-Signature")
     if not received_signature:
@@ -654,10 +688,11 @@ def verify_hmac(request):
 
     return hmac.compare_digest(received_signature, expected_signature)
 
-@app.before_request
-def hmac_auth_middleware():
-    if not verify_hmac(request):
-            abort(401, "Invalid token")
+
+# @app.before_request
+# def hmac_auth_middleware():
+#     if not verify_hmac(request):
+#             abort(401, "Invalid token")
 
 # test auth endpoint
 @app.route("/indextest", methods=["POST"])
@@ -665,25 +700,3 @@ def indextest():
     return "API is running", 200
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-    # options = []
-    # orders = [
-    #         {
-    #             "name": "big mac",
-    #             "pcs": 2,
-    #             "pref": "regular",
-    #         }
-    #     ]
-    # # grab_res = grab_check_order_food("mcdonald", "state.data.delivery_location", orders, "state.data.delivery_note")
-    # # if grab_res is not None:
-    # #     if not (isinstance(grab_res, dict) and grab_res["status"] == "not_logged_in"):
-    # #             options.append(grab_res)
-    # foodpanda_res = foodpanda_check_price("mcdonald", "state.data.delivery_location", orders, "state.data.delivery_note")
-    # if foodpanda_res is not None:
-    #     print("cek logic", not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"))
-    #     if not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"):
-    #         print("response:", foodpanda_res)
-    #         options.append(foodpanda_res)
-    # deliveroo_res = deliveroo_check_price("mcdonald", "state.data.delivery_location", orders)
-    # if deliveroo_res is not None:
-    #     if not (isinstance(deliveroo_res, dict) and deliveroo_res["status"] == "not_logged_in"):
-    #         options.append(deliveroo_res)
