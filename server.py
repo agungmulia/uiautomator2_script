@@ -672,7 +672,7 @@ def stop_tunnel():
             print("~/.secret folder removed.")
 
         return jsonify({
-            "message": f"Tunnel '{tunnel_name}' stopped and cron removed (if any)."
+            "message": f"Tunnel stopped and cron removed (if any)."
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -698,6 +698,11 @@ def trigger_tunnel():
             stderr=subprocess.PIPE,
             text=True
         )
+
+        stdout, stderr = process.communicate()
+
+        print("[STDOUT]", stdout)
+        print("[STDERR]", stderr)
 
         boot_dir = os.path.expanduser("~/.termux/boot")
         health_script_path = os.path.join(boot_dir, "health-check.sh")
