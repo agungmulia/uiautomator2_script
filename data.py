@@ -147,6 +147,7 @@ class MessageData:
     to: str
     message: str
     add_contact: Optional[MessageAddContact] = None
+    to_options: Optional[List[str]] = None
     image: str = ""
     login_qr: str = ""
 

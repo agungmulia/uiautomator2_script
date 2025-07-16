@@ -12,12 +12,14 @@ def login():
 
     # while not (d(resourceId="com.whatsapp:id/choose_language").exists() or d(resourceId="com.whatsapp:id/eula_accept").exists()):
     #     time.sleep(0.2)
+    # time.sleep(1)
     # if d(resourceId="com.whatsapp:id/choose_language").exists():
     #     d(resourceId="com.whatsapp:id/next_button").click()
+    # time.sleep(1)
     # if d(resourceId="com.whatsapp:id/eula_accept").exists():
     #     d(resourceId="com.whatsapp:id/eula_accept").click()
     # accept_permissions(d)
-
+    # time.sleep(1)
 
     d.screenshot("qr.jpeg")
     # Step 2: Open the PNG and convert to JPEG
@@ -25,13 +27,20 @@ def login():
     buffer = io.BytesIO()
     image.save(buffer, format="JPEG", quality=60)  # Reduce quality for smaller size
     buffer.seek(0)
+    import requests
+        # Step 3: Upload the image as a file
+    url = 'https://api.heypico.ai/upload-file'
+    files = {'file': ('qr.jpeg', buffer, 'image/jpeg')}
 
-    # Step 3: Encode to base64
-    encoded_string = base64.b64encode(buffer.read()).decode("utf-8")
+    response = requests.post(url, files=files)
 
-    data_uri = f"data:image/jpeg;base64,{encoded_string}"
-
-    return {"message":"get qr success", "status": "success", "qr": data_uri}
+    # Step 4: Print result
+    print("Status Code:", response.status_code)
+    print("Response Body:", response.text)
+    print("url:", response.json()["url"])
+    if response.status_code != 200:
+        return {"message":"get qr failed", "status": "failed"}
+    return {"message":"get qr success", "status": "success", "qr": response.json()["url"]}
 
 def login_otp(otp):
     d = u2.connect()
@@ -49,4 +58,4 @@ def login_otp(otp):
     # print( {"message":"login success", "status": "success", "qr": encoded_string})
 if __name__ == "__main__":
     # login("8565075699")
-    login_otp("783780")
+    login()
