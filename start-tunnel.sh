@@ -42,7 +42,7 @@ else
 
   echo "$PAYLOAD"
 
-  RESPONSE=$(curl -s -X POST https://1wzpbwv2-3000.asse.devtunnels.ms/cloudflare \
+  RESPONSE=$(curl -s -X POST https://api.heypico.ai/cloudflare \
   -H "Content-Type: application/json" \
   -H "X-Signature: $SIGNATURE" \
   -d "$PAYLOAD")

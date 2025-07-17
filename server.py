@@ -677,15 +677,6 @@ def stop_tunnel():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 import logging
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,  # or DEBUG, WARNING, etc.
-    format='%(asctime)s %(levelname)s: %(message)s',
-    handlers=[
-        logging.FileHandler("server.log"),  # writes to a file
-        logging.StreamHandler()             # also prints to console
-    ]
-)
 @app.route('/register-tunnel', methods=['POST'])
 def trigger_tunnel():
     data = request.get_json()
