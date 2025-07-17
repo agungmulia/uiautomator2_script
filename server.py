@@ -676,13 +676,15 @@ def stop_tunnel():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
+import logging
 @app.route('/register-tunnel', methods=['POST'])
 def trigger_tunnel():
     data = request.get_json()
     tunnel_name = data.get('name')
     user_id = data.get('userId')
     secret = data.get('secret')
+
+    logging.info(f"Received tunnel registration request: {data}")
 
     if not tunnel_name:
         return jsonify({'error': 'Missing tunnel name'}), 400
