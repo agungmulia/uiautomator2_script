@@ -655,14 +655,17 @@ def stop_tunnel():
 
     try:
         # Check if screen session exists
-        screen_list = subprocess.check_output(["screen", "-ls"], text=True)
-        if f"\t{screen_name}\t" in screen_list or f".{screen_name}\t" in screen_list:
-            subprocess.run(["screen", "-S", screen_name, "-X", "quit"], check=False)
-            print(f"Stopped screen session: {screen_name}")
+        if shutil.which("screen"):
+            screen_list = subprocess.check_output(["screen", "-ls"], text=True)
+            if f"\t{screen_name}\t" in screen_list or f".{screen_name}\t" in screen_list:
+                subprocess.run(["screen", "-S", screen_name, "-X", "quit"], check=False)
+                print(f"Stopped screen session: {screen_name}")
+            else:
+                print("No screen session found. Falling back to pkill cloudflared.")
+                subprocess.run(["pkill", "-f", "cloudflared"], check=False)
         else:
-            # Fallback: try killing cloudflared directly
+            print("screen command not found. Falling back to pkill cloudflared.")
             subprocess.run(["pkill", "-f", "cloudflared"], check=False)
-            print("No screen session found. Fallback to pkill cloudflared.")
 
         # Remove health-check cron entry
         cron_line = "/data/data/com.termux/files/home/.termux/boot/health-check-cron.sh"
