@@ -697,7 +697,7 @@ def stop_tunnel():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
+import threading
 @app.route('/register-tunnel', methods=['POST'])
 def trigger_tunnel():
     data = request.get_json()
@@ -722,8 +722,13 @@ def trigger_tunnel():
             text=True
         )
 
-        logging.info(f"[stdout] {process.stdout}")
-        logging.error(f"[stderr] {process.stderr}")
+        def log_stream(stream, level=logging.INFO):
+            for line in iter(stream.readline, ''):
+                logging.log(level, line.strip())
+            stream.close()
+
+        threading.Thread(target=log_stream, args=(process.stdout, logging.INFO)).start()
+        threading.Thread(target=log_stream, args=(process.stderr, logging.ERROR)).start()
 
         boot_dir = os.path.expanduser("~/.termux/boot")
         health_script_path = os.path.join(boot_dir, "health-check.sh")
