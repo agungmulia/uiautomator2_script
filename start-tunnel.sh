@@ -52,8 +52,6 @@ else
   # Extract fields
   TUNNEL_ID=$(echo "$RESPONSE" | jq -r '.tunnel_id')
   TUNNEL_NAME=$(echo "$RESPONSE" | jq -r '.tunnel_name')
-  CREDENTIALS=$(echo "$RESPONSE" | jq -r '.credentials_file')
-  CONFIG_YAML=$(echo "$RESPONSE" | jq -r '.config_yaml')
   TUNNEL_TOKEN=$(echo "$RESPONSE" | jq -r '.token')
 
   if [[ -z "$TUNNEL_ID" || "$TUNNEL_ID" == "null" ]]; then
