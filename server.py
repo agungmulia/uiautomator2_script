@@ -637,6 +637,17 @@ def food_flow():
 
     print("sent state: ", state)
     return jsonify(asdict(state))
+
+import logging
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,  # or DEBUG, WARNING, etc.
+    format='%(asctime)s %(levelname)s: %(message)s',
+    handlers=[
+        logging.FileHandler("server.log"),  # writes to a file
+        logging.StreamHandler()             # also prints to console
+    ]
+)
 @app.route('/stop-tunnel', methods=['POST'])
 def stop_tunnel():
     data = request.get_json()
@@ -676,16 +687,7 @@ def stop_tunnel():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-import logging
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,  # or DEBUG, WARNING, etc.
-    format='%(asctime)s %(levelname)s: %(message)s',
-    handlers=[
-        logging.FileHandler("server.log"),  # writes to a file
-        logging.StreamHandler()             # also prints to console
-    ]
-)
+
 @app.route('/register-tunnel', methods=['POST'])
 def trigger_tunnel():
     data = request.get_json()
@@ -734,6 +736,8 @@ def trigger_tunnel():
 
 def verify_hmac(request):
     received_signature = request.headers.get("X-Signature")
+    logging.info(f"Received tunnel stop sign: {received_signature}")
+
     if not received_signature:
         return False
     SHARED_SECRET = ""
@@ -746,6 +750,7 @@ def verify_hmac(request):
         SHARED_SECRET = b"secret"
     # Construct the message (you can customize this)
     message = request.get_data()  # Raw body content
+    logging.info(f"Received tunnel stop request: {message}")
 
     # Generate HMAC using secret
     expected_signature = hmac.new(SHARED_SECRET, message, hashlib.sha256).hexdigest()
