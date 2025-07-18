@@ -651,23 +651,27 @@ logging.basicConfig(
 @app.route('/stop-tunnel', methods=['POST'])
 def stop_tunnel():
     data = request.get_json()
-    screen_name = "tunnel"  # or "tunnel" if fixed
+    screen_name = "tunnel"
 
     try:
-        # Check if screen session exists
+        # --- Stop Cloudflare Tunnel ---
         if shutil.which("screen"):
-            screen_list = subprocess.check_output(["screen", "-ls"], text=True)
-            if f"\t{screen_name}\t" in screen_list or f".{screen_name}\t" in screen_list:
-                subprocess.run(["screen", "-S", screen_name, "-X", "quit"], check=False)
-                print(f"Stopped screen session: {screen_name}")
-            else:
-                print("No screen session found. Falling back to pkill cloudflared.")
+            try:
+                screen_list = subprocess.check_output(["screen", "-ls"], text=True, stderr=subprocess.STDOUT)
+                if f"\t{screen_name}\t" in screen_list or f".{screen_name}\t" in screen_list:
+                    subprocess.run(["screen", "-S", screen_name, "-X", "quit"], check=False)
+                    print(f"Stopped screen session: {screen_name}")
+                else:
+                    print("Screen running, but session not found. Fallback to pkill cloudflared.")
+                    subprocess.run(["pkill", "-f", "cloudflared"], check=False)
+            except subprocess.CalledProcessError:
+                print("No screen session exists. Fallback to pkill cloudflared.")
                 subprocess.run(["pkill", "-f", "cloudflared"], check=False)
         else:
             print("screen command not found. Falling back to pkill cloudflared.")
             subprocess.run(["pkill", "-f", "cloudflared"], check=False)
 
-        # Remove health-check cron entry
+        # --- Remove health-check cron job ---
         cron_line = "/data/data/com.termux/files/home/.termux/boot/health-check-cron.sh"
         try:
             current_cron = subprocess.check_output(["crontab", "-l"], text=True)
@@ -680,6 +684,7 @@ def stop_tunnel():
         except subprocess.CalledProcessError:
             print("No crontab set yet — skipping removal.")
 
+        # --- Remove secret folder ---
         secret_path = os.path.expanduser("~/.secret")
         if os.path.exists(secret_path) and os.path.isdir(secret_path):
             shutil.rmtree(secret_path)
@@ -688,8 +693,10 @@ def stop_tunnel():
         return jsonify({
             "message": f"Tunnel stopped and cron removed (if any)."
         })
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/register-tunnel', methods=['POST'])
 def trigger_tunnel():
