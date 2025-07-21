@@ -82,5 +82,24 @@ else
   echo "[✓] Secret saved at $SECRET_FILE"
 fi
 
+set +e
+
+if command -v su >/dev/null 2>&1; then
+  su -c "setprop service.adb.tcp.port 5555"
+  su -c "stop adbd"
+  su -c "start adbd"
+
+  if [ $? -eq 0 ]; then
+    echo "[✓] ADB started on port 5555. Try: adb connect $LOCAL_IP:5555"
+  else
+    echo "[!] ADB start attempted but failed (maybe no root permissions?)"
+  fi
+else
+  echo "[!] 'su' command not found. Skipping ADB startup."
+fi
+
+# Restore error trapping
+set -e
+
 echo "[*] Launching tunnel with cloudflared..."
 cloudflared tunnel run --token "$(cat "$TOKEN_FILE")"
