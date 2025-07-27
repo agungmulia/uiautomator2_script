@@ -759,7 +759,7 @@ def updateScript():
         subprocess.Popen(["bash", health_script_path])
 
         return jsonify({
-            "message": f"Tunnel stopped and cron removed (if any)."
+            "message": f"Script Updated"
         })
 
     except Exception as e:
