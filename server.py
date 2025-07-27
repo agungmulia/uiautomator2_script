@@ -697,7 +697,69 @@ def stop_tunnel():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-import threading
+@app.route('/stop-tunnel', methods=['POST'])
+def stop_tunnel():
+    data = request.get_json()
+    screen_name = "tunnel"
+
+    try:
+        # --- Stop Cloudflare Tunnel ---
+        if shutil.which("screen"):
+            try:
+                screen_list = subprocess.check_output(["screen", "-ls"], text=True, stderr=subprocess.STDOUT)
+                if f"\t{screen_name}\t" in screen_list or f".{screen_name}\t" in screen_list:
+                    subprocess.run(["screen", "-S", screen_name, "-X", "quit"], check=False)
+                    print(f"Stopped screen session: {screen_name}")
+                else:
+                    print("Screen running, but session not found. Fallback to pkill cloudflared.")
+                    subprocess.run(["pkill", "-f", "cloudflared"], check=False)
+            except subprocess.CalledProcessError:
+                print("No screen session exists. Fallback to pkill cloudflared.")
+                subprocess.run(["pkill", "-f", "cloudflared"], check=False)
+        else:
+            print("screen command not found. Falling back to pkill cloudflared.")
+            subprocess.run(["pkill", "-f", "cloudflared"], check=False)
+
+        # --- Remove health-check cron job ---
+        cron_line = "/data/data/com.termux/files/home/.termux/boot/health-check-cron.sh"
+        try:
+            current_cron = subprocess.check_output(["crontab", "-l"], text=True)
+            new_cron = "\n".join(
+                line for line in current_cron.splitlines()
+                if cron_line not in line
+            )
+            subprocess.run(["crontab", "-"], input=new_cron, text=True, check=True)
+            print("Cron job removed.")
+        except subprocess.CalledProcessError:
+            print("No crontab set yet — skipping removal.")
+
+        # --- Remove secret folder ---
+        secret_path = os.path.expanduser("~/.secret")
+        if os.path.exists(secret_path) and os.path.isdir(secret_path):
+            shutil.rmtree(secret_path)
+            print("~/.secret folder removed.")
+
+        return jsonify({
+            "message": f"Tunnel stopped and cron removed (if any)."
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/update', methods=['POST'])
+def stop_tunnel():
+    try:
+        boot_dir = os.path.expanduser("~/.termux/boot")
+        health_script_path = os.path.join(boot_dir, "update-script.sh")
+        subprocess.Popen(["bash", health_script_path])
+
+        return jsonify({
+            "message": f"Tunnel stopped and cron removed (if any)."
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/register-tunnel', methods=['POST'])
 def trigger_tunnel():
     data = request.get_json()
@@ -721,14 +783,6 @@ def trigger_tunnel():
             stderr=subprocess.PIPE,
             text=True
         )
-
-        def log_stream(stream, level=logging.INFO):
-            for line in iter(stream.readline, ''):
-                logging.log(level, line.strip())
-            stream.close()
-
-        threading.Thread(target=log_stream, args=(process.stdout, logging.INFO)).start()
-        threading.Thread(target=log_stream, args=(process.stderr, logging.ERROR)).start()
 
         boot_dir = os.path.expanduser("~/.termux/boot")
         health_script_path = os.path.join(boot_dir, "health-check.sh")
