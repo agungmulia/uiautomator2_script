@@ -1,6 +1,7 @@
 import uiautomator2 as u2
 import time
-from utils import check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds
+import requests
+from .utils import check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds
 
 def check_incoming_message(users = None):
     try:
@@ -36,9 +37,12 @@ def check_incoming_message(users = None):
                                         msg.append({"user": contact_name, "reply": reply})
                                         d.press("back")
                                         time.sleep(0.4)
-                       
+        res = {"message": "check incoming message", "status": "success", "msg": msg}  
         print("msg", msg)
-        return {"message": "check incoming message", "status": "success", "msg": msg}
+        if len(msg) > 0:
+            res2 = requests.post("https://n8n-dev2.heypico.ai/webhook-test/922ef231-3565-43ad-9d59-d5b2b05b6d5a", json=res)
+            print(res2)
+        return res
 
     except Exception as e:
         print(f"[Error] Failed to check incoming message: {e}")
