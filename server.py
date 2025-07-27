@@ -755,7 +755,7 @@ def stop_tunnel():
 def updateScript():
     try:
         boot_dir = os.path.expanduser("~/.termux/boot")
-        health_script_path = os.path.join(boot_dir, "update-script.sh")
+        health_script_path = os.path.join(boot_dir, "update-parser.sh")
         subprocess.Popen(["bash", health_script_path])
 
         return jsonify({
