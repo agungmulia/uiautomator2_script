@@ -1,9 +1,13 @@
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify
+import subprocess
 import hmac, hashlib, time
 from pathlib import Path
+
 from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler
 from Grab.services.login import login_otp as grab_login_otp, login as grab_login
 from Grab.services.cancel_ride import cancel_ride as grab_cancel_ride
+from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler,  cancel_ride as grab_cancel_ride
+from Grab.services.login import login_otp as grab_login_otp, login as grab_login
 from Grab.services.food import check_order_food as grab_check_order_food, checkout as grab_checkout
 from ryde.service.check_price import check_price as ryde_check_price
 from ryde.service.book_ride import book_ride as ryde_book_ride
@@ -24,8 +28,12 @@ from tada.check_price import check_price as tada_check_price
 from tada.book_ride import book_ride as tada_book_ride
 from tada.cancel_ride import cancel_ride as tada_cancel_ride
 
+
 from whatsapp.send_message import send_message as whatsapp_send_message
 from whatsapp.login import login as whatsapp_login 
+import os
+import json
+import shutil
 import time
 from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info, FoodOrderData, parse_food_items, parse_order_result, parse_menu_options, MenuOption, OrderResult, MessageData, parse_to, parse_to_options
 import time
@@ -33,8 +41,8 @@ from dataclasses import asdict
 
 app = Flask(__name__)
 
-@app.route("/ping", methods=["GET"])
-def ping():
+@app.route("/health_check", methods=["GET"])
+def healthCheck():
     return "API is running", 200
 @app.route("/health_check", methods=["GET"])
 def health():
@@ -640,6 +648,7 @@ def food_flow():
     print("sent state: ", state)
     return jsonify(asdict(state))
 
+
 @app.route("/messaging/flow", methods=["POST"])
 def message_flow():
     req = request.get_json()
@@ -683,8 +692,129 @@ def message_flow():
         # print("res:", res)
     print("data:", data)
     return jsonify(asdict(data))
+import logging
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,  # or DEBUG, WARNING, etc.
+    format='%(asctime)s %(levelname)s: %(message)s',
+    handlers=[
+        logging.FileHandler("server.log"),  # writes to a file
+        logging.StreamHandler()             # also prints to console
+    ]
+)
+@app.route('/stop-tunnel', methods=['POST'])
+def stop_tunnel():
+    data = request.get_json()
+    screen_name = "tunnel"
+
+    try:
+        # --- Stop Cloudflare Tunnel ---
+        if shutil.which("screen"):
+            try:
+                screen_list = subprocess.check_output(["screen", "-ls"], text=True, stderr=subprocess.STDOUT)
+                if f"\t{screen_name}\t" in screen_list or f".{screen_name}\t" in screen_list:
+                    subprocess.run(["screen", "-S", screen_name, "-X", "quit"], check=False)
+                    print(f"Stopped screen session: {screen_name}")
+                else:
+                    print("Screen running, but session not found. Fallback to pkill cloudflared.")
+                    subprocess.run(["pkill", "-f", "cloudflared"], check=False)
+            except subprocess.CalledProcessError:
+                print("No screen session exists. Fallback to pkill cloudflared.")
+                subprocess.run(["pkill", "-f", "cloudflared"], check=False)
+        else:
+            print("screen command not found. Falling back to pkill cloudflared.")
+            subprocess.run(["pkill", "-f", "cloudflared"], check=False)
+
+        # --- Remove health-check cron job ---
+        cron_line = "/data/data/com.termux/files/home/.termux/boot/health-check-cron.sh"
+        try:
+            current_cron = subprocess.check_output(["crontab", "-l"], text=True)
+            new_cron = "\n".join(
+                line for line in current_cron.splitlines()
+                if cron_line not in line
+            )
+            subprocess.run(["crontab", "-"], input=new_cron, text=True, check=True)
+            print("Cron job removed.")
+        except subprocess.CalledProcessError:
+            print("No crontab set yet — skipping removal.")
+
+        # --- Remove secret folder ---
+        secret_path = os.path.expanduser("~/.secret")
+        if os.path.exists(secret_path) and os.path.isdir(secret_path):
+            shutil.rmtree(secret_path)
+            print("~/.secret folder removed.")
+
+        return jsonify({
+            "message": f"Tunnel stopped and cron removed (if any)."
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/update', methods=['POST'])
+def stop_tunnel():
+    try:
+        boot_dir = os.path.expanduser("~/.termux/boot")
+        health_script_path = os.path.join(boot_dir, "update-script.sh")
+        subprocess.Popen(["bash", health_script_path])
+
+        return jsonify({
+            "message": f"Tunnel stopped and cron removed (if any)."
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/register-tunnel', methods=['POST'])
+def trigger_tunnel():
+    data = request.get_json()
+    tunnel_name = data.get('name')
+    user_id = data.get('userId')
+    secret = data.get('secret')
+
+    logging.info(f"Received tunnel registration request: {data}")
+
+    if not tunnel_name:
+        return jsonify({'error': 'Missing tunnel name'}), 400
+    if not user_id:
+        return jsonify({'error': 'Missing user id'}), 400
+    if not secret:
+        return jsonify({'error': 'Missing secret'}), 400
+
+    try:
+        process = subprocess.Popen(
+            ["bash", "./start-tunnel.sh", tunnel_name, user_id, secret],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+
+        boot_dir = os.path.expanduser("~/.termux/boot")
+        health_script_path = os.path.join(boot_dir, "health-check.sh")
+        cron_script_path = os.path.join(boot_dir, "health-check-cron.sh")
+ 
+        base_url = f"https://{tunnel_name}.heypico1.xyz"
+        subprocess.run([
+            "sed", "-i", f"s|^BASE_URL=.*|BASE_URL=\\\"{base_url}\\\"|", health_script_path
+        ])
+
+        subprocess.Popen(["bash", cron_script_path])
+
+        return jsonify({
+            "message": f"Tunnel '{tunnel_name}' is launching in background.",
+            "pid": process.pid,
+            "tunnel_name": tunnel_name,
+            "user_id": user_id,
+            "secret": secret
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+      
 def verify_hmac(request):
     received_signature = request.headers.get("X-Signature")
+    logging.info(f"Received tunnel stop sign: {received_signature}")
+
     if not received_signature:
         return False
     SHARED_SECRET = ""
@@ -697,6 +827,7 @@ def verify_hmac(request):
         SHARED_SECRET = b"secret"
     # Construct the message (you can customize this)
     message = request.get_data()  # Raw body content
+    logging.info(f"Received tunnel stop request: {message}")
 
     # Generate HMAC using secret
     expected_signature = hmac.new(SHARED_SECRET, message, hashlib.sha256).hexdigest()
@@ -706,12 +837,16 @@ def verify_hmac(request):
 
 @app.before_request
 def hmac_auth_middleware():
+    excluded_routes = ['healthCheck','trigger_tunnel']  # Name of the view function
+    if request.endpoint in excluded_routes:
+        return 
     if not verify_hmac(request):
-            abort(401, "Invalid token")
+            return jsonify({"error": "Unauthorized", "message": "Invalid Token"}), 403
 
 # test auth endpoint
 @app.route("/indextest", methods=["POST"])
 def indextest():
     return "API is running", 200
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
