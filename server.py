@@ -2,6 +2,10 @@ from flask import Flask, request, jsonify
 import subprocess
 import hmac, hashlib, time
 from pathlib import Path
+
+from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler
+from Grab.services.login import login_otp as grab_login_otp, login as grab_login
+from Grab.services.cancel_ride import cancel_ride as grab_cancel_ride
 from Grab.services import book_ride_handler, order_food_handler, confirmation_check_handler,  cancel_ride as grab_cancel_ride
 from Grab.services.login import login_otp as grab_login_otp, login as grab_login
 from Grab.services.food import check_order_food as grab_check_order_food, checkout as grab_checkout
@@ -24,11 +28,14 @@ from tada.check_price import check_price as tada_check_price
 from tada.book_ride import book_ride as tada_book_ride
 from tada.cancel_ride import cancel_ride as tada_cancel_ride
 
+
+from whatsapp.send_message import send_message as whatsapp_send_message
+from whatsapp.login import login as whatsapp_login 
 import os
 import json
 import shutil
 import time
-from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info, FoodOrderData, parse_food_items, parse_order_result, parse_menu_options, MenuOption, OrderResult
+from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info, FoodOrderData, parse_food_items, parse_order_result, parse_menu_options, MenuOption, OrderResult, MessageData, parse_to, parse_to_options
 import time
 from dataclasses import asdict
 
@@ -36,6 +43,9 @@ app = Flask(__name__)
 
 @app.route("/health_check", methods=["GET"])
 def healthCheck():
+    return "API is running", 200
+@app.route("/health_check", methods=["GET"])
+def health():
     return "API is running", 200
 
 @app.route("/grab", methods=["POST"])
@@ -638,6 +648,50 @@ def food_flow():
     print("sent state: ", state)
     return jsonify(asdict(state))
 
+
+@app.route("/messaging/flow", methods=["POST"])
+def message_flow():
+    req = request.get_json()
+
+    step = req.get("step")
+    print("step:", step, "raw data:", req)
+
+    data = MessageData(
+        step=req.get("step", ""),
+        app=req.get("app", ""),
+        to=parse_to(req.get("to", [])),
+        to_options=parse_to_options(req.get("to_options", [])),
+        message=req.get("message", ""),
+        image=req.get("image", ""),
+        login_qr=req.get("login_qr", "")
+    )
+
+    if step == "login":
+        data.login_qr = ""
+        # if res["status"] == "choose_contact":
+        #     data.to_options = res["contact"]
+        #     data.to = ""
+    # elif step == "wait_for_qr":
+
+    elif step == "send_message":
+        res = whatsapp_send_message(data.to, data.message)
+        # res = {"status": "not_logged_in", "login_qr": "https://c206abf8b79ee2544bf4d5d0e9e1b8e6.r2.cloudflarestorage.com/heypico-note/recordings/1752657308315_qr.jpeg"}
+        # res = {"message": "contact list", "status": "choose_contact", "contact": [{"to": "john", "options": ["john doe", "john smith", "john smith jr"]}, {"to": "jane", "options": ["jane doe", "jane smith", "jane smith jr"]}] }
+        # res = {"message": "message sent", "status": "success"}
+        print("res:", res)
+        if res["status"] == "not_logged_in":
+            data.login_qr = res["login_qr"]
+        elif res["status"] == "choose_contact":
+            data.to_options = res["contact"]
+            # data.to = 
+    elif step == "choose_contact":
+        data.to_options = None
+        res = whatsapp_send_message(data.to, data.message)
+        # res = {"message": "message sent", "status": "success"}
+
+        # print("res:", res)
+    print("data:", data)
+    return jsonify(asdict(data))
 import logging
 # Configure logging
 logging.basicConfig(
@@ -756,7 +810,7 @@ def trigger_tunnel():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
+      
 def verify_hmac(request):
     received_signature = request.headers.get("X-Signature")
     logging.info(f"Received tunnel stop sign: {received_signature}")
@@ -780,6 +834,7 @@ def verify_hmac(request):
 
     return hmac.compare_digest(received_signature, expected_signature)
 
+
 @app.before_request
 def hmac_auth_middleware():
     excluded_routes = ['healthCheck','trigger_tunnel']  # Name of the view function
@@ -795,25 +850,3 @@ def indextest():
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-    # options = []
-    # orders = [
-    #         {
-    #             "name": "big mac",
-    #             "pcs": 2,
-    #             "pref": "regular",
-    #         }
-    #     ]
-    # # grab_res = grab_check_order_food("mcdonald", "state.data.delivery_location", orders, "state.data.delivery_note")
-    # # if grab_res is not None:
-    # #     if not (isinstance(grab_res, dict) and grab_res["status"] == "not_logged_in"):
-    # #             options.append(grab_res)
-    # foodpanda_res = foodpanda_check_price("mcdonald", "state.data.delivery_location", orders, "state.data.delivery_note")
-    # if foodpanda_res is not None:
-    #     print("cek logic", not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"))
-    #     if not (isinstance(foodpanda_res, dict) and foodpanda_res["status"] == "not_logged_in"):
-    #         print("response:", foodpanda_res)
-    #         options.append(foodpanda_res)
-    # deliveroo_res = deliveroo_check_price("mcdonald", "state.data.delivery_location", orders)
-    # if deliveroo_res is not None:
-    #     if not (isinstance(deliveroo_res, dict) and deliveroo_res["status"] == "not_logged_in"):
-    #         options.append(deliveroo_res)
