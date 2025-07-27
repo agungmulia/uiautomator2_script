@@ -140,17 +140,28 @@ class MessageAddContact:
     number: str
     app: str
 
+
+@dataclass
+class ToOptions:
+    to: str
+    options: List[str]
+
+def parse_to_options(raw_to_options):
+    return [ToOptions(**opt) for opt in raw_to_options]
+
 @dataclass
 class MessageData:
     step: str
     app: str
-    to: str
+    to: List[str]
     message: str
     add_contact: Optional[MessageAddContact] = None
-    to_options: Optional[List[str]] = None
+    to_options: Optional[List[ToOptions]] = None
     image: str = ""
     login_qr: str = ""
 
+def parse_to(raw_to):
+    return [str(i) for i in raw_to]
 @dataclass
 class FlowState:
     flow: str
