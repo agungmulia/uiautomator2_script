@@ -764,6 +764,12 @@ def updateScript():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+def log_stream(stream, level=logging.INFO):
+    for line in iter(stream.readline, ''):
+        logging.log(level, line.strip())
+    stream.close()
+
 
 import threading
 @app.route('/register-tunnel', methods=['POST'])
@@ -789,11 +795,6 @@ def trigger_tunnel():
             stderr=subprocess.PIPE,
             text=True
         )
-
-        def log_stream(stream, level=logging.INFO):
-            for line in iter(stream.readline, ''):
-                logging.log(level, line.strip())
-            stream.close()
 
         threading.Thread(target=log_stream, args=(process.stdout, logging.INFO)).start()
         threading.Thread(target=log_stream, args=(process.stderr, logging.ERROR)).start()
