@@ -789,8 +789,7 @@ def trigger_tunnel():
 
     try:
         # Resolve absolute path to script
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        script_path = os.path.join(script_dir, "start-tunnel.sh")
+        script_path = os.path.expanduser("~/.hidden/start-tunnel.sh")
 
         # Check script exists and is executable
         if not os.path.exists(script_path):
@@ -807,8 +806,7 @@ def trigger_tunnel():
             ["bash", script_path, tunnel_name, user_id, secret],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True,
-            cwd=script_dir  # ensure correct working directory
+            text=True
         )
 
         # Log the output in background
