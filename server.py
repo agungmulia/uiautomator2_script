@@ -764,14 +764,13 @@ def updateScript():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+import threading
 def log_stream(stream, level=logging.INFO):
     for line in iter(stream.readline, ''):
-        logging.log(level, line.strip())
+        if line:
+            logging.log(level, line.strip())
     stream.close()
 
-
-import threading
 @app.route('/register-tunnel', methods=['POST'])
 def trigger_tunnel():
     data = request.get_json()
@@ -789,26 +788,52 @@ def trigger_tunnel():
         return jsonify({'error': 'Missing secret'}), 400
 
     try:
+        # Resolve absolute path to script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        script_path = os.path.join(script_dir, "start-tunnel.sh")
+
+        # Check script exists and is executable
+        if not os.path.exists(script_path):
+            logging.error(f"Script not found at: {script_path}")
+            return jsonify({"error": f"start-tunnel.sh not found at {script_path}"}), 500
+        if not os.access(script_path, os.X_OK):
+            logging.warning(f"Script not executable. Fixing permission...")
+            os.chmod(script_path, 0o755)
+
+        logging.info(f"Launching script: {script_path} with args: {tunnel_name}, {user_id}, {secret}")
+
+        # Start the script process
         process = subprocess.Popen(
-            ["bash", "./start-tunnel.sh", tunnel_name, user_id, secret],
+            ["bash", script_path, tunnel_name, user_id, secret],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
+            cwd=script_dir  # ensure correct working directory
         )
 
+        # Log the output in background
         threading.Thread(target=log_stream, args=(process.stdout, logging.INFO)).start()
         threading.Thread(target=log_stream, args=(process.stderr, logging.ERROR)).start()
 
+        # Update BASE_URL in health-check.sh
         boot_dir = os.path.expanduser("~/.termux/boot")
         health_script_path = os.path.join(boot_dir, "health-check.sh")
         cron_script_path = os.path.join(boot_dir, "health-check-cron.sh")
- 
-        base_url = f"https://{tunnel_name}.heypico1.xyz"
-        subprocess.run([
-            "sed", "-i", f"s|^BASE_URL=.*|BASE_URL=\\\"{base_url}\\\"|", health_script_path
-        ])
 
-        subprocess.Popen(["bash", cron_script_path])
+        base_url = f"https://{tunnel_name}.heypico1.xyz"
+
+        if os.path.exists(health_script_path):
+            subprocess.run([
+                "sed", "-i", f"s|^BASE_URL=.*|BASE_URL=\\\"{base_url}\\\"|", health_script_path
+            ])
+        else:
+            logging.warning(f"health-check.sh not found at {health_script_path}")
+
+        # Start the cron job
+        if os.path.exists(cron_script_path):
+            subprocess.Popen(["bash", cron_script_path], cwd=boot_dir)
+        else:
+            logging.warning(f"health-check-cron.sh not found at {cron_script_path}")
 
         return jsonify({
             "message": f"Tunnel '{tunnel_name}' is launching in background.",
@@ -819,6 +844,7 @@ def trigger_tunnel():
         })
 
     except Exception as e:
+        logging.exception("Error while launching tunnel")
         return jsonify({"error": str(e)}), 500
       
 def verify_hmac(request):
