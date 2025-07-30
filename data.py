@@ -32,7 +32,7 @@ class LoginInfo:
 class TransportBookingData:
     pickup_location: Optional[str] = None  # e.g. "current_location" or address
     destination: Optional[str] = None
-    s_saved_pickup: bool = False            
+    is_saved_pickup: bool = False            
     is_saved_destination: bool = False
     time: Optional[str] = "now"  # Future support
     app: Optional[str] = None  # "grab", "gojek", etc.
