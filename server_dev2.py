@@ -527,8 +527,8 @@ def transport_flow():
 
     state = FlowState(flow="transport_booking", step=step, data=data)
 
-    # thread = threading.Thread(target=transport_flow_handler, args=(state,))
-    # thread.start()
+    thread = threading.Thread(target=transport_flow_handler, args=(state,))
+    thread.start()
     print(f"[Thread] Started processing step: {state.step}")
     time.sleep(5)  # simulasi proses FSM
     print("[Thread] Finished processing, sending to n8n")
