@@ -27,7 +27,7 @@ from tada.cancel_ride import cancel_ride as tada_cancel_ride
 from whatsapp.send_message import send_message as whatsapp_send_message
 from whatsapp.login import login as whatsapp_login 
 import time
-from data import FlowState, FlowStateFood, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info, FoodOrderData, parse_food_items, parse_order_result, parse_menu_options, MenuOption, OrderResult, MessageData, parse_to, parse_to_options
+from data import FlowState, TransportBookingData, parse_booking_options, parse_selected_option, BookingOption, SelectedOption, BookingResult, parse_booking_result, fetch_rides, parse_login_info, FoodOrderData, parse_food_items, parse_order_result, parse_menu_options, MenuOption, OrderResult, MessageData, parse_to, parse_to_options
 import time
 from dataclasses import asdict
 
