@@ -533,7 +533,7 @@ def transport_flow():
     time.sleep(5)  # simulasi proses FSM
     print("[Thread] Finished processing, sending to n8n")
     send_to_n8n(state)
-    # return jsonify({"status": "processing", "next_step": state.step})
+    return jsonify({"status": "processing", "next_step": state.step})
 
 def transport_flow_handler(state: FlowState):
     print(f"Running FSM for step: {state.step}")
