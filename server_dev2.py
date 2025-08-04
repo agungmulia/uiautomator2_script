@@ -530,7 +530,7 @@ def transport_flow():
     thread = threading.Thread(target=transport_flow_handler, args=(state,))
     thread.start()
     print(f"[Thread] Started processing step: {state.step}")
-    time.sleep(5)  # simulasi proses FSM
+    time.sleep(5) 
     print("[Thread] Finished processing, sending to n8n")
     send_to_n8n(state)
     return jsonify({"status": "processing", "next_step": state.step})
@@ -797,10 +797,10 @@ def transport_flow_handler(state: FlowState):
     send_to_n8n(state)
 
 
-def send_to_n8n(state: FlowState):
+def send_to_n8n(state: FlowState):  
     try:
         response = requests.post(
-            "https://n8n.heypico.ai/workflow/OCwkdlFeG74GfXZu",
+            "https://api.heypico.ai/transport/webhook",
             json=asdict(state),
             timeout=10
         )
