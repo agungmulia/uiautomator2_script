@@ -800,7 +800,7 @@ def transport_flow_handler(state: FlowState):
 def send_to_n8n(state: FlowState):  
     try:
         response = requests.post(
-            "https://api.heypico.ai/transport/webhook",
+            "https://api.heypico.ai/companion-device/transport/webhook",
             json=asdict(state),
             timeout=10
         )
