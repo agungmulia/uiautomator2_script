@@ -21,6 +21,7 @@ def check_price(destination, pickup_time):
 
         # proceed book
         print("proceed booking zig")
+        time.sleep(0.5)
         ride_comp = find_components(d, "car rides")
         if ride_comp is not None:
             ride_coord = coordinate_bounds(ride_comp["bounds"])
