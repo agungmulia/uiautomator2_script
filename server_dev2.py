@@ -805,7 +805,11 @@ def send_to_n8n(state: FlowState):
     try:
         response = requests.post(
             "https://api.heypico.ai/companion-device/transport/webhook",
-            json=asdict(state),
+            json={
+                "userId": state.user_id,
+                "body": asdict(state),
+                "route": "/transport/flow"
+            },
             timeout=10
         )
         print(f"Sent to n8n: {response.status_code}")
