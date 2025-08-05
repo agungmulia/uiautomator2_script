@@ -529,7 +529,7 @@ def transport_flow():
         cancelled=raw_data.get("cancelled", False)
     )
 
-    state = FlowState(flow="transport_booking", step=step, data=data)
+    state = FlowState(flow="transport_booking", step=step, data=data, session_id=session_id, user_id=user_id)
     print("receive state", state)
     thread = threading.Thread(target=transport_flow_handler, args=(state,))
     thread.start()
