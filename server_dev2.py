@@ -508,14 +508,18 @@ def transport_flow():
     flow = req.get("flow")
     step = req.get("step")
     raw_data = req.get("data", {})
-
+    session_id = req.get("session_id")
+    user_id = req.get("user_id")
     data = TransportBookingData(
         pickup_location=raw_data.get("pickup_location", ""),
         is_saved_pickup=raw_data.get("is_saved_pickup", False),
+        session_id=raw_data.get("session_id", ""),
+        user_id=raw_data.get("user_id", ""),
         destination=raw_data.get("destination", ""),
         is_saved_destination=raw_data.get("is_saved_destination", False),
         time=raw_data.get("time", "now"),
         app=raw_data.get("app"),
+        is_logged_in=raw_data.get("is_logged_in", True),
         login_info=parse_login_info(raw_data.get("login_info")),
         is_payment_default_exist=raw_data.get("is_payment_default_exist", True),
         confirmation_check_done=raw_data.get("confirmation_check_done", False),
@@ -526,7 +530,7 @@ def transport_flow():
     )
 
     state = FlowState(flow="transport_booking", step=step, data=data)
-
+    print("receive state", state)
     thread = threading.Thread(target=transport_flow_handler, args=(state,))
     thread.start()
     print(f"[Thread] Started processing step: {state.step}")
