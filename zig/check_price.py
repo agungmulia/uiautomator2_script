@@ -25,11 +25,11 @@ def check_price(destination, pickup_time):
         if ride_comp is not None:
             ride_coord = coordinate_bounds(ride_comp["bounds"])
             d.click(*ride_coord)
-        while not d(resourceId="txtInputDestination").exists():
+        while not d(resourceId="com.codigo.comfort:id/txtInputIntermediateDestinationLocation").exists():
             print("input destination")
             time.sleep(0.1)
         # time.sleep(0.2)
-        d(resourceId="txtInputDestination").click()
+        d(resourceId="com.codigo.comfort:id/txtInputIntermediateDestinationLocation").click()
         
         while not d(text="Where to?").exists():
             print("where to")
