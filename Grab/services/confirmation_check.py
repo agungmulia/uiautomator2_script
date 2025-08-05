@@ -5,10 +5,10 @@ import uiautomator2 as u2
 import xml.etree.ElementTree as ET
 from general import check_login_status, clear_unexpected_popups, accept_permissions, notify_n8n
 
-def confirmation_check_handler(destination, pickup_time):
+def confirmation_check_handler(pickup_loc, destination, pickup_time):
     print(f"🚖 Booking ride to {destination} at {pickup_time}...")
     try:
-        d = u2.connect('127.0.0.1:7912')
+        d = u2.connect()
         sess = d.session("com.grabtaxi.passenger") 
         threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
         threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
@@ -26,6 +26,29 @@ def confirmation_check_handler(destination, pickup_time):
         while not sess(text="Where to?").exists():
             time.sleep(0.1)
         sess(text="Where to?").click()
+
+        while not d(text="Saved").exists():
+            time.sleep(0.2)
+        
+        # if pickup_loc != "current_location":
+        #     if is_saved_pickup:
+        #         d(text="Saved").click()
+        #         ls = d(resourceId="com.grabtaxi.passenger:id/list_item_heading")
+        #         for l in ls:
+        #             if l.get_text().lower() == pickup_loc:
+        #                 l.click()
+        #                 break
+        #     else:
+        #         sess(resourceId="com.grabtaxi.passenger:id/poi_first_search").send_keys(pickup_loc)
+                
+        # if is_saved_destination:
+        #     d(text="Saved").click()
+        #     ls = d(resourceId="com.grabtaxi.passenger:id/list_item_heading")
+        #     for l in ls:
+        #         if l.get_text().lower() == destination:
+        #             l.click()
+        #             break
+        # else:
         sess(resourceId="com.grabtaxi.passenger:id/poi_second_search").send_keys(destination)
 
         while not sess(resourceId="com.grabtaxi.passenger:id/list_item_with_additional_info_container_parent", instance=0).exists():
