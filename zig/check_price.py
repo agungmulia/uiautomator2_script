@@ -20,17 +20,16 @@ def check_price(destination, pickup_time):
         clear_unexpected_popups(d)
 
         # proceed book
-        print("proceed booking zig")
-        time.sleep(0.5)
+        print("proceed booking")
         ride_comp = find_components(d, "car rides")
         if ride_comp is not None:
             ride_coord = coordinate_bounds(ride_comp["bounds"])
             d.click(*ride_coord)
-        while not d(resourceId="com.codigo.comfort:id/txtInputIntermediateDestinationLocation").exists():
+        while not d(resourceId="txtInputDestination").exists():
             print("input destination")
             time.sleep(0.1)
         # time.sleep(0.2)
-        d(resourceId="com.codigo.comfort:id/txtInputIntermediateDestinationLocation").click()
+        d(resourceId="txtInputDestination").click()
         
         while not d(text="Where to?").exists():
             print("where to")
