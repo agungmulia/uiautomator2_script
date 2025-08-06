@@ -662,7 +662,7 @@ def transport_flow_handler(state: FlowState):
                         )
                     )
         elif (state.data.app.lower() == "grab"):
-            grab_result = confirmation_check_handler(state.data.destination, state.data.time)
+            grab_result = confirmation_check_handler(state.data.pickup_location, state.data.destination, state.data.time)
             if grab_result is not None:
                 if not (isinstance(grab_result, dict) and grab_result["status"] == "not_logged_in"):
                     for i, opt in enumerate(grab_result):
