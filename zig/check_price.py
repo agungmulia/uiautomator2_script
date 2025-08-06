@@ -1,14 +1,17 @@
 import uiautomator2 as u2
+import threading
 import time
 import re
-from .utils import select_language, check_login_status, clear_unexpected_popups, accept_permissions, screen_components, find_components, find_components_by_id, coordinate_bounds, find_components_by_drawing_order
+from .utils import select_language, check_login_status, screen_components, find_components, find_components_by_id, coordinate_bounds, find_components_by_drawing_order
+from general import  clear_unexpected_popups, accept_permissions
 def check_price(destination, pickup_time):
     try:
         print("init check price")
         d = u2.connect()
         d.app_start("com.codigo.comfort", stop=True)
+        threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
+        threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
         time.sleep(1)
-        clear_unexpected_popups(d)
         # select language
         accept_permissions(d)
 
@@ -17,7 +20,6 @@ def check_price(destination, pickup_time):
         if not check_login_status(d):
             print("User is not logged in. Please log in to continue.")
             return {"status": "not_logged_in", "message": "User is not logged in. Please log in to continue."}
-        clear_unexpected_popups(d)
 
         # proceed book
         print("proceed booking zig")
