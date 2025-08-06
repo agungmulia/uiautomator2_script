@@ -533,10 +533,10 @@ def transport_flow():
     print("receive state", state)
     thread = threading.Thread(target=transport_flow_handler, args=(state,))
     thread.start()
-    print(f"[Thread] Started processing step: {state.step}")
-    time.sleep(5) 
-    print("[Thread] Finished processing, sending to n8n")
-    send_to_n8n(state)
+    # print(f"[Thread] Started processing step: {state.step}")
+    # time.sleep(5) 
+    # print("[Thread] Finished processing, sending to n8n")
+    # send_to_n8n(state)
     return jsonify({"status": "processing", "next_step": state.step})
 
 def transport_flow_handler(state: FlowState):
@@ -797,8 +797,6 @@ def transport_flow_handler(state: FlowState):
         state.data.confirmation_check_done = False
         state.step = "confirmation_check_pending"
 
-    print(f"testtttt")
-    # Kirim ke Webhook
     send_to_n8n(state)
 
 
