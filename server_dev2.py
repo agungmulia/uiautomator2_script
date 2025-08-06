@@ -677,7 +677,7 @@ def transport_flow_handler(state: FlowState):
                 else:
                     state.data.is_logged_in = False
                     state.step = "login"
-                    return jsonify(asdict(state))
+                    return send_to_n8n(state)
 
         elif (state.data.app.lower() == "ryde"):
             ryde_result = ryde_check_price(state.data.destination, state.data.time)
