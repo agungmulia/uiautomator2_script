@@ -13,8 +13,6 @@ def check_price(destination, pickup_time):
         threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
         time.sleep(1)
         # select language
-        accept_permissions(d)
-
         select_language(d)
 
         if not check_login_status(d):
