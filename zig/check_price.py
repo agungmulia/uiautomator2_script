@@ -21,23 +21,17 @@ def check_price(destination, pickup_time):
 
         # proceed book
         print("proceed booking zig")
-        time.sleep(2)
+        time.sleep(0.5)
+        while not find_components(d, "car rides") is not None:
+            time.sleep(0.3)
         ride_comp = find_components(d, "car rides")
         if ride_comp is not None:
             ride_coord = coordinate_bounds(ride_comp["bounds"])
             d.click(*ride_coord)
             print("clicked ride coordinate")
         else:
-            parent = d(resourceId="imgCarRides")
-            if parent.exists():
-                children = parent.child(className="android.view.View")
-                for child in children:
-                    print(child.info)
-                    if child.info.get("clickable"):
-                        child.click()
-                        break
-            else:
-                print("Parent not found")
+            print("clicked using xpath")
+            d.xpath('//android.view.View[@resource-id="imgCarRides"]/android.view.View').click()
         while not d(resourceId="com.codigo.comfort:id/txtInputIntermediateDestinationLocation").exists():
             print("input destination")
             time.sleep(0.1)
