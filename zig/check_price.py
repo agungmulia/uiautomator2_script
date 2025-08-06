@@ -23,6 +23,7 @@ def check_price(destination, pickup_time):
         print("proceed booking zig")
         time.sleep(0.5)
         while not find_components(d, "car rides") is not None:
+            print("wait for component car rides")
             time.sleep(0.3)
         ride_comp = find_components(d, "car rides")
         if ride_comp is not None:
