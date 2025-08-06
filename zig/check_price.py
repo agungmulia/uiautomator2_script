@@ -29,7 +29,12 @@ def check_price(destination, pickup_time):
             print("clicked ride coordinate")
         else:
             print("clicked using class child")
-            d(resourceId="imgCarRides").child(className="android.view.View", clickable=True).click()
+            parent = d(resourceId="imgCarRides")
+            for child in parent.child():
+                print(child)
+                if child.info.get("clickable"):
+                    child.click()
+                    break
         while not d(resourceId="com.codigo.comfort:id/txtInputIntermediateDestinationLocation").exists():
             print("input destination")
             time.sleep(0.1)
