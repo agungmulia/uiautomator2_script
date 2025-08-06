@@ -9,7 +9,7 @@ def confirmation_check_handler(pickup_loc, destination, pickup_time):
     print(f"🚖 Booking ride to {destination} at {pickup_time}...")
     try:
         d = u2.connect()
-        sess = d.session("com.grabtaxi.passenger") 
+        sess = d.app_start("com.grabtaxi.passenger") 
         threading.Thread(target=accept_permissions, args=(d,), daemon=True).start()
         threading.Thread(target=clear_unexpected_popups, args=(d,), daemon=True).start()
 
