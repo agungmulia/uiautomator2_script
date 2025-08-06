@@ -28,8 +28,8 @@ def check_price(destination, pickup_time):
             d.click(*ride_coord)
             print("clicked ride coordinate")
         else:
-            print("clicked using xpath")
-            d.xpath('//android.view.View[@resource-id="imgCarRides"]/android.view.View').click()
+            print("clicked using class child")
+            d(resourceId="imgCarRides").child(className="android.view.View", clickable=True).click()
         while not d(resourceId="com.codigo.comfort:id/txtInputIntermediateDestinationLocation").exists():
             print("input destination")
             time.sleep(0.1)
